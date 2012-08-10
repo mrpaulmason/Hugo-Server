@@ -1,5 +1,7 @@
 #!/usr/bin/python
-import getopt, sys
+import getopt, sys, os
+import boto
+import boto.ec2
 
 env = "local"
 server = "webserver"
@@ -25,8 +27,9 @@ def usage():
     print "hugo-admin.py [--env=local|staging|production] [--server=webserver] [--action=update|restart|stop]"
 
 def main():
+    global env, server, action
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "e:s:a:", ["env=", "server=" "action="])
+        opts, args = getopt.getopt(sys.argv[1:], "e:s:a:", ["env=", "server=", "action="])
     except getopt.GetoptError, err:
         print str(err) # will print something like "option -a not recognized"
         usage()
@@ -51,8 +54,16 @@ def main():
             action = a
         else:
             assert False, "unhandled option"
-    # ...
+
 
 if __name__ == "__main__":
     main()
     print bcolors.OKBLUE + "Running a '%s' on '%s' for '%s' environment." % (action, server, env) + bcolors.ENDC
+    if action == "restart" and server == "webserver":
+        f = open('webserver/webserver-init.sh', 'r')
+        uswest = boto.ec2.get_region("us-west-1")
+        conn = uswest.connect()
+        reservation = conn.run_instances("ami-db86a39e", key_name="hugo", instance_type="t1.micro", security_groups=["webserver"], user_data =f.read())
+    
+    
+    

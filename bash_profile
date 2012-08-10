@@ -1,0 +1,5 @@
+export PS1='\[\033[0;35m\]\h\[\033[0;33m\] \w\[\033[00m\]: '
+
+export EC2_HOME=~/.ec2
+export AWS_ACCESS_KEY_ID="AKIAJG4PP3FPHEQC76HQ"
+export AWS_SECRET_ACCESS_KEY="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"
