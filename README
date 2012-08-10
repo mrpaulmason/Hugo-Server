@@ -1,0 +1,5 @@
+ec2-run-instances ami-db86a39e \
+	--instance-type t1.micro \
+	--region us-west-1 \
+	--key ${EC2_KEYPAIR_US_WEST_1} \
+	--user-data-file webserver-init.sh
