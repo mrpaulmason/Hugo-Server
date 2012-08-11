@@ -1,10 +1,14 @@
 #!/bin/sh
 
+echo "Installing basic packages" >> /etc/webserver-init.touchdown
+
 apt-get -qy update
 apt-get -qy install git
 apt-get -qy install memcached nginx python-tornado supervisor
 
-cat <<EOF > ~/hugo.pem
+echo "Copying key" >> /etc/webserver-init.touchdown
+
+cat <<EOF > /root/hugo.pem
 -----BEGIN RSA PRIVATE KEY-----
 MIIEpgIBAAKCAQEAvD4jBsNc6zTZYh0OGLYh0X6uDS4fONZegVumBTYpdTKibcU8DLf0dQKuMbCF
 FlOsD3kw45GOrmRXpRwaCbst5QddOnEdBF6f+odSrcCfakG59SJAEsSmakJ1rD5uVKan1JvFYDsX
@@ -29,14 +33,17 @@ QPPHfT188WwwAZdYGiKiLXh00oOcIdtMlUWu9VcBmVe8wEDpAoGBAN2KY1Aa43cLb/Z0YkuUYFX/
 gR13sD94SpsTapCt17A7XnovYCNJ0C5RChiNXb+Vu3JORu2DCR1CjAbUeAzAPyoP/pz7Mxze
 -----END RSA PRIVATE KEY-----
 EOF
-chmod 400 ~/hugo.pem
+chmod 400 /root/hugo.pem
 
-cat <<EOF > ~/.ssh/config
+mkdir -p /root/.ssh
+cat <<EOF > /root/.ssh/config
 Host github.com
-  IdentityFile ~/hugo.pem
+  IdentityFile /root/hugo.pem
+  StrictHostKeyChecking no
 EOF
 
+echo "Downloading code" >> /etc/webserver-init.touchdown
 git clone git@github.com:pmm25/Hugo-Server.git /var/hugo
 
-touch /etc/webserver-init.touchdown
+echo "Web server running" >> /etc/webserver-init.touchdown
 
