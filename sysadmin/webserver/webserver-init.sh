@@ -1,5 +1,11 @@
 #!/bin/sh
 
+
+echo "Configuring environment" >> /etc/webserver-init.touchdown
+
+echo "HUGO_ENV=!HUGO_ENV!" >> /etc/environment
+echo "HUGO_SERVER=!HUGO_SERVER!" >> /etc/environment
+
 echo "Installing basic packages" >> /etc/webserver-init.touchdown
 
 apt-get -qy update
@@ -45,5 +51,14 @@ EOF
 echo "Downloading code" >> /etc/webserver-init.touchdown
 git clone git@github.com:pmm25/Hugo-Server.git /var/hugo
 
-echo "Web server running" >> /etc/webserver-init.touchdown
+echo "Installing configuration files" >> /etc/webserver-init.touchdown
+cp "/var/hugo/sysadmin/webserver/${HUGO_ENV}/supervisord.conf" /etc/supervisor/conf.d/
+cp "/var/hugo/sysadmin/webserver/${HUGO_ENV}/nginx/nginx.conf" /etc/nginx/sites-available/default
 
+mkdir -p /var/www
+cp -rf "/var/hugo/src/api/*" /var/www/
+
+/etc/init.d/nginx restart
+/etc/init.d/supervisor restart
+
+echo "Web server running" >> /etc/webserver-init.touchdown

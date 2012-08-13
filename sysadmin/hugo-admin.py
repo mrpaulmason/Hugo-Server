@@ -63,7 +63,10 @@ if __name__ == "__main__":
         f = open('webserver/webserver-init.sh', 'r')
         uswest = boto.ec2.get_region("us-west-1")
         conn = uswest.connect()
-        reservation = conn.run_instances("ami-db86a39e", key_name="hugo", instance_type="t1.micro", security_groups=["webserver"], user_data =f.read())
+        user_script = f.read()
+        user_script = user_script.replace("!HUGO_SERVER!", server.lower())
+        user_script = user_script.replace("!HUGO_ENV!", env.lower())
+        reservation = conn.run_instances("ami-db86a39e", key_name="hugo", instance_type="t1.micro", security_groups=["webserver"], user_data =user_script)
     
     
     
