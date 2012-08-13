@@ -6,6 +6,9 @@ echo "Configuring environment" >> /etc/webserver-init.touchdown
 echo "HUGO_ENV=!HUGO_ENV!" >> /etc/environment
 echo "HUGO_SERVER=!HUGO_SERVER!" >> /etc/environment
 
+export "HUGO_ENV=!HUGO_ENV!"
+export "HUGO_SERVER=!HUGO_SERVER!"
+
 echo "Installing basic packages" >> /etc/webserver-init.touchdown
 
 apt-get -qy update
@@ -53,12 +56,20 @@ git clone git@github.com:pmm25/Hugo-Server.git /var/hugo
 
 echo "Installing configuration files" >> /etc/webserver-init.touchdown
 cp "/var/hugo/sysadmin/webserver/${HUGO_ENV}/supervisord.conf" /etc/supervisor/conf.d/
-cp "/var/hugo/sysadmin/webserver/${HUGO_ENV}/nginx/nginx.conf" /etc/nginx/sites-available/default
+cp "/var/hugo/sysadmin/webserver/${HUGO_ENV}/nginx/nginx.conf" /etc/nginx/
 
+/etc/init.d/supervisor stop
+
+echo "PIDFILE=/var/log/tornado/supervisord.pid" >> /etc/default/supervisor
+echo "LOGDIR=/var/log/tornado/supervisord.log" >> /etc/default/supervisor
+
+mkdir -p /var/log/tornado
 mkdir -p /var/www
-cp -rf "/var/hugo/src/api/*" /var/www/
+cp -rf /var/hugo/src/api/* /var/www/
+
+chown -R www-data /var/log/tornado
 
 /etc/init.d/nginx restart
-/etc/init.d/supervisor restart
+/etc/init.d/supervisor start
 
 echo "Web server running" >> /etc/webserver-init.touchdown
