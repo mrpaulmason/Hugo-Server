@@ -5,9 +5,11 @@ import boto.ec2
 import subprocess
 import time
 
-env = "local"
+env = "staging"
 server = "webserver"
 action = "update"
+
+ip_mapping = {'webserver' : {'local':"50.18.125.100", "staging":"50.18.125.158", "production":"50.18.125.159"}}
 
 class bcolors:
     HEADER = '\033[95m'
@@ -70,6 +72,7 @@ if __name__ == "__main__":
     main()
     print bcolors.OKBLUE + "Running a '%s' on '%s' for '%s' environment." % (action, server, env) + bcolors.ENDC
     if action == "update" and server == "webserver":
+        start = time.time()
         uswest = boto.ec2.get_region("us-west-1")
         conn = uswest.connect()
         reservations = conn.get_all_instances()
@@ -83,11 +86,35 @@ if __name__ == "__main__":
                     print output
                 except:
                     print "Failed updating server %s" % i.public_dns_name
-        print bcolors.OKBLUE + "Update completed for '%s' on '%s' for '%s' environment." % (action, server, env) + bcolors.ENDC
+        print bcolors.OKBLUE + "Update completed for '%s' on '%s' for '%s' environment (%f s)." % (action, server, env, time.time()-start) + bcolors.ENDC
+    elif action == "stop" and server == "webserver":
+        uswest = boto.ec2.get_region("us-west-1")
+        conn = uswest.connect()
+        reservations = conn.get_all_instances()
+        instances = [i for r in reservations for i in r.instances]
+        instances = [i for i in instances if i.state=="running"]
+        for i in instances:
+            if i.tags['Environment'] == env and i.tags['Server'] == server and i.tags['Busy'] == "no":
+                print bcolors.FAIL + "Terminating machine '%s' for '%s' on '%s' for '%s' environment." % (i.public_dns_name, action, server, env) + bcolors.ENDC                
+                i.terminate()
+        print bcolors.OKBLUE + "Machines terminated for '%s' on '%s' for '%s' environment." % (action, server, env) + bcolors.ENDC    
     elif action == "restart" and server == "webserver":
+        start = time.time()
         f = open('webserver/webserver-init.sh', 'r')
         uswest = boto.ec2.get_region("us-west-1")
         conn = uswest.connect()
+        reservations = conn.get_all_instances()
+        instances = [i for r in reservations for i in r.instances]
+        instances = [i for i in instances if i.state=="running"]
+        terminatedNodes = False
+        for i in instances:
+            if i.tags['Environment'] == env and i.tags['Server'] == server and i.tags['Busy'] == "no":
+                print bcolors.FAIL + "Terminating machine '%s' for '%s' on '%s' for '%s' environment." % (i.public_dns_name, action, server, env) + bcolors.ENDC                
+                i.terminate()
+                terminatedNodes = True
+        if terminatedNodes:
+            print bcolors.OKBLUE + "Machines terminated for '%s' on '%s' for '%s' environment." % (action, server, env) + bcolors.ENDC    
+
         user_script = f.read()
         user_script = user_script.replace("!HUGO_SERVER!", server.lower())
         user_script = user_script.replace("!HUGO_ENV!", env.lower())
@@ -119,10 +146,17 @@ if __name__ == "__main__":
                     time.sleep(10)
                     
         if output[0].find("FINISHED") == 0:
-            print bcolors.OKBLUE + "Successfully running a '%s' on '%s' for '%s' environment." % (action, server, env) + bcolors.ENDC
             instance.add_tag("Busy", "no")
+            addresses = [x for x in conn.get_all_addresses() if x.public_ip == ip_mapping[server][env]]
+            try:
+                addresses[0].associate(instance.id)                
+                print bcolors.OKBLUE + "Successfully ran a '%s' on '%s' for '%s' environment (%f s) with IP %s." % (action, server, env, time.time()-start, ip_mapping[server][env]) + bcolors.ENDC                
+            except:
+                print bcolors.FAIL + "FAILED associating IP address with '%s' on '%s' for '%s' environment (%f s)." % (action, server, env, time.time()-start) + bcolors.ENDC
+                instance.terminate()
+            
         else:
-            print bcolors.FAIL + "FAILED running a '%s' on '%s' for '%s' environment." % (action, server, env) + bcolors.ENDC
+            print bcolors.FAIL + "FAILED running a '%s' on '%s' for '%s' environment (%f s)." % (action, server, env, time.time()-start) + bcolors.ENDC
             instance.terminate()
             
         
