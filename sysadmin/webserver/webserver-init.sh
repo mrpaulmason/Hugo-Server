@@ -63,6 +63,8 @@ cp "/var/hugo/sysadmin/webserver/${HUGO_ENV}/nginx/nginx.conf" /etc/nginx/
 echo "PIDFILE=/var/log/tornado/supervisord.pid" >> /etc/default/supervisor
 echo "LOGDIR=/var/log/tornado/supervisord.log" >> /etc/default/supervisor
 
+chmod +x `find /var/hugo|grep py`
+chmod +x `find /var/hugo|grep sh`
 mkdir -p /var/log/tornado
 mkdir -p /var/www
 cp -rf /var/hugo/src/api/* /var/www/

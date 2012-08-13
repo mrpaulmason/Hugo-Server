@@ -76,7 +76,14 @@ if __name__ == "__main__":
         instances = [i for r in reservations for i in r.instances]
         instances = [i for i in instances if i.state=="running"]
         for i in instances:
-            print i.tags        
+            if i.tags['Environment'] == env and i.tags['Server'] == server and i.tags['Busy'] == "no":
+                try:
+                    print "Running %s" % ("ssh -o StrictHostKeyChecking=no ubuntu@%s sudo /var/hugo/sysadmin/%s/%s-update.sh" % (i.public_dns_name, server, server))
+                    output = check_output("ssh -o StrictHostKeyChecking=no ubuntu@%s sudo /var/hugo/sysadmin/%s/%s-update.sh" % (i.public_dns_name, server, server))
+                    print output
+                except:
+                    print "Failed updating server %s" % i.public_dns_name
+        print bcolors.OKBLUE + "Update completed for '%s' on '%s' for '%s' environment." % (action, server, env) + bcolors.ENDC
     elif action == "restart" and server == "webserver":
         f = open('webserver/webserver-init.sh', 'r')
         uswest = boto.ec2.get_region("us-west-1")
