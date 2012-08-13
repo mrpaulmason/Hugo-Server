@@ -15,3 +15,5 @@ cp -rf /var/hugo/src/api/* /var/www/
 
 /etc/init.d/nginx restart
 /etc/init.d/supervisor restart
+
+exit 0
