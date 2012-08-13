@@ -14,6 +14,8 @@ mkdir -p /var/www
 cp -rf /var/hugo/src/api/* /var/www/
 
 /etc/init.d/nginx restart
-/etc/init.d/supervisor restart
+/etc/init.d/supervisor stop
+sleep 1
+/etc/init.d/supervisor start
 
 exit 0
