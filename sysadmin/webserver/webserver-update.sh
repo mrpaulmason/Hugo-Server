@@ -1,6 +1,7 @@
 #!/bin/sh
 
 cd /var/hugo
+git reset --hard HEAD
 git pull
 
 cp "/var/hugo/sysadmin/webserver/${HUGO_ENV}/supervisord.conf" /etc/supervisor/conf.d/
