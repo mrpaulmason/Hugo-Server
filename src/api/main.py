@@ -7,7 +7,7 @@ import os, sys, getopt
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write("Hello, world")
+        self.write("Hello, world !!!")
 
 settings = {
             "static_path": os.path.join(os.path.dirname(__file__), "static")
