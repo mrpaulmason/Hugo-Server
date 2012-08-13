@@ -72,4 +72,4 @@ chown -R www-data /var/log/tornado
 /etc/init.d/nginx restart
 /etc/init.d/supervisor start
 
-echo "Web server running" >> /etc/webserver-init.touchdown
+echo "FINISHED" >> /etc/webserver-init.touchdown

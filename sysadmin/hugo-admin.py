@@ -2,6 +2,8 @@
 import getopt, sys, os
 import boto
 import boto.ec2
+import subprocess
+import time
 
 env = "local"
 server = "webserver"
@@ -22,6 +24,14 @@ class bcolors:
         self.WARNING = ''
         self.FAIL = ''
         self.ENDC = ''
+
+def check_output(command):
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+    output = process.communicate()
+    retcode = process.poll()
+    if retcode:
+        raise subprocess.CalledProcessError(retcode, command, output=output[0])
+    return output
 
 def usage():
     print "hugo-admin.py [--env=local|staging|production] [--server=webserver] [--action=update|restart|stop]"
@@ -59,7 +69,15 @@ def main():
 if __name__ == "__main__":
     main()
     print bcolors.OKBLUE + "Running a '%s' on '%s' for '%s' environment." % (action, server, env) + bcolors.ENDC
-    if action == "restart" and server == "webserver":
+    if action == "update" and server == "webserver":
+        uswest = boto.ec2.get_region("us-west-1")
+        conn = uswest.connect()
+        reservations = conn.get_all_instances()
+        instances = [i for r in reservations for i in r.instances]
+        instances = [i for i in instances if i.state=="running"]
+        for i in instances:
+            print i.tags        
+    elif action == "restart" and server == "webserver":
         f = open('webserver/webserver-init.sh', 'r')
         uswest = boto.ec2.get_region("us-west-1")
         conn = uswest.connect()
@@ -67,6 +85,37 @@ if __name__ == "__main__":
         user_script = user_script.replace("!HUGO_SERVER!", server.lower())
         user_script = user_script.replace("!HUGO_ENV!", env.lower())
         reservation = conn.run_instances("ami-db86a39e", key_name="hugo", instance_type="t1.micro", security_groups=["webserver"], user_data =user_script)
-    
-    
-    
+        instance = reservation.instances[0]
+        status = instance.update()
+        while status == 'pending':
+            time.sleep(1)
+            status = instance.update()
+            
+        if status == 'running':
+            instance.add_tag("Name","%s - %s" % (server.title(), env.title()))
+            instance.add_tag("Server","%s" % server)
+            instance.add_tag("Environment","%s" % env)
+            instance.add_tag("Busy","yes")
+        else:
+            print('Instance status: ' + status)
+            sys.exit(1)
+            
+        print "Server is up and running at %s" % (instance.public_dns_name)
+        
+        if status == "running":
+            retry = True
+            while retry:
+                try:
+                    output = check_output("ssh -o StrictHostKeyChecking=no ubuntu@%s cat /etc/webserver-init.touchdown|grep FINISHED" % (instance.public_dns_name))
+                    retry = False
+                except:
+                    time.sleep(10)
+                    
+        if output[0].find("FINISHED") == 0:
+            print bcolors.OKBLUE + "Successfully running a '%s' on '%s' for '%s' environment." % (action, server, env) + bcolors.ENDC
+            instance.add_tag("Busy", "no")
+        else:
+            print bcolors.FAIL + "FAILED running a '%s' on '%s' for '%s' environment." % (action, server, env) + bcolors.ENDC
+            instance.terminate()
+            
+        
