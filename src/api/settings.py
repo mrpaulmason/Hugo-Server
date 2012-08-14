@@ -23,14 +23,12 @@ TEMPLATE_ROOT = path(ROOT, 'templates')
 
 class DeploymentType:
     PRODUCTION = "PRODUCTION"
-    DEV = "DEV"
-    SOLO = "SOLO"
+    SOLO = "LOCAL"
     STAGING = "STAGING"
     dict = {
         SOLO: 1,
         PRODUCTION: 2,
-        DEV: 3,
-        STAGING: 4
+        STAGING: 3
     }
 
 if 'HUGO_ENV' in os.environ:
@@ -39,7 +37,7 @@ else:
     DEPLOYMENT = DeploymentType.SOLO
 
 settings = {}
-settings['debug'] = DEPLOYMENT != DeploymentType.PRODUCTION or options.debug
+settings['debug'] = DEPLOYMENT == DeploymentType.SOLO or options.debug
 settings['static_path'] = MEDIA_ROOT
 settings['cookie_secret'] = "paulryanserena"
 settings['xsrf_cookies'] = True
