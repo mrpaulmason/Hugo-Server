@@ -6,4 +6,4 @@ logger = logging.getLogger('boilerplate.' + __name__)
 
 class PlacesHandler(BaseHandler):
     def get(self):
-        self.render("base.html")
+        self.render("places.json")
