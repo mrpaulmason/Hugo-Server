@@ -9,8 +9,6 @@ env = "staging"
 server = "webserver"
 action = "update"
 
-ip_mapping = {'webserver' : {'local':"50.18.125.100", "staging":"50.18.125.158", "production":"50.18.125.159"}}
-
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -105,16 +103,9 @@ if __name__ == "__main__":
         conn = uswest.connect()
         reservations = conn.get_all_instances()
         instances = [i for r in reservations for i in r.instances]
-        instances = [i for i in instances if i.state=="running"]
+        oldInstances = [i for i in instances if i.state=="running"]
         terminatedNodes = False
-        for i in instances:
-            if i.tags['Environment'] == env and i.tags['Server'] == server and i.tags['Busy'] == "no":
-                print bcolors.FAIL + "Terminating machine '%s' for '%s' on '%s' for '%s' environment." % (i.public_dns_name, action, server, env) + bcolors.ENDC                
-                i.terminate()
-                terminatedNodes = True
-        if terminatedNodes:
-            print bcolors.OKBLUE + "Machines terminated for '%s' on '%s' for '%s' environment." % (action, server, env) + bcolors.ENDC    
-
+        
         user_script = f.read()
         user_script = user_script.replace("!HUGO_SERVER!", server.lower())
         user_script = user_script.replace("!HUGO_ENV!", env.lower())
@@ -126,7 +117,7 @@ if __name__ == "__main__":
             status = instance.update()
             
         if status == 'running':
-            instance.add_tag("Name","%s - %s" % (server.title(), env.title()))
+            instance.add_tag("Name","%s-%s" % (server, env))
             instance.add_tag("Server","%s" % server)
             instance.add_tag("Environment","%s" % env)
             instance.add_tag("Busy","yes")
@@ -147,16 +138,27 @@ if __name__ == "__main__":
                     
         if output[0].find("FINISHED") == 0:
             instance.add_tag("Busy", "no")
-            addresses = [x for x in conn.get_all_addresses() if x.public_ip == ip_mapping[server][env]]
+            elb = boto.ec2.elb.connect_to_region('us-west-1')
+            lb = [x for x in elb.get_all_load_balancers() if x.name == "%s-%s" % (env, server)]
             try:
-                addresses[0].associate(instance.id)                
-                print bcolors.OKBLUE + "Successfully ran a '%s' on '%s' for '%s' environment (%f s) with IP %s." % (action, server, env, time.time()-start, ip_mapping[server][env]) + bcolors.ENDC                
+                lb[0].register_instances(instance.id)                
+                print bcolors.OKBLUE + "Successfully ran a '%s' on '%s' for '%s' environment (%f s) with LB %s." % (action, server, env, time.time()-start, lb[0].name) + bcolors.ENDC                
             except:
-                print bcolors.FAIL + "FAILED associating IP address with '%s' on '%s' for '%s' environment (%f s)." % (action, server, env, time.time()-start) + bcolors.ENDC
+                print bcolors.FAIL + "FAILED associating LB with '%s' on '%s' for '%s' environment (%f s)." % (action, server, env, time.time()-start) + bcolors.ENDC
                 instance.terminate()
+                sys.exit(1)
             
         else:
             print bcolors.FAIL + "FAILED running a '%s' on '%s' for '%s' environment (%f s)." % (action, server, env, time.time()-start) + bcolors.ENDC
             instance.terminate()
+            sys.exit(1)
+
+        for i in oldInstances:
+            if i.tags['Environment'] == env and i.tags['Server'] == server and i.tags['Busy'] == "no":
+                print bcolors.FAIL + "Terminating machine '%s' for '%s' on '%s' for '%s' environment." % (i.public_dns_name, action, server, env) + bcolors.ENDC                
+                i.terminate()
+                terminatedNodes = True
+        if terminatedNodes:
+            print bcolors.OKBLUE + "Machines terminated for '%s' on '%s' for '%s' environment." % (action, server, env) + bcolors.ENDC    
             
         
