@@ -17,6 +17,7 @@ cp -rf /var/hugo/src/api/* /var/www/
 /etc/init.d/nginx restart
 /etc/init.d/supervisor stop
 sleep 1
+unlink /tmp/supervisor.sock
 /etc/init.d/supervisor start
 
 exit 0

@@ -44,7 +44,6 @@ settings['xsrf_cookies'] = True
 settings['template_loader'] = tornado.template.Loader(TEMPLATE_ROOT)
 
 SYSLOG_TAG = "boilerplate"
-SYSLOG_FACILITY = logging.handlers.SysLogHandler.LOG_LOCAL2
 
 # See PEP 391 and logconfig for formatting help.  Each section of LOGGERS
 # will get merged into the corresponding section of log_settings.py.
@@ -61,10 +60,9 @@ if settings['debug']:
     LOG_LEVEL = logging.DEBUG
 else:
     LOG_LEVEL = logging.INFO
-USE_SYSLOG = DEPLOYMENT != DeploymentType.SOLO
 
-logconfig.initialize_logging(SYSLOG_TAG, SYSLOG_FACILITY, LOGGERS,
-        LOG_LEVEL, USE_SYSLOG)
+logconfig.initialize_logging(SYSLOG_TAG, LOGGERS,
+        LOG_LEVEL)
 
 if options.config:
     tornado.options.parse_config_file(options.config)

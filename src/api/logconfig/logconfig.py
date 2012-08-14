@@ -40,12 +40,8 @@ class NullHandler(logging.Handler):
     def emit(self, record):
         pass
 
-def initialize_logging(syslog_tag, syslog_facility, loggers,
-        log_level=logging.INFO, use_syslog=False):
-    if os.path.exists('/dev/log'):
-        syslog_device = '/dev/log'
-    elif os.path.exists('/var/run/syslog'):
-        syslog_device = '/var/run/syslog'
+def initialize_logging(syslog_tag, loggers,
+        log_level=logging.INFO):
 
     base_fmt = ('%(name)s:%(levelname)s %(message)s:%(pathname)s:%(lineno)s')
 
@@ -76,12 +72,6 @@ def initialize_logging(syslog_tag, syslog_facility, loggers,
             'null': {
                 '()': NullHandler,
             },
-            'syslog': {
-                '()': logging.handlers.SysLogHandler,
-                'facility': syslog_facility,
-                'address': syslog_device,
-                'formatter': 'prod',
-            },
         },
         'loggers': {
         }
@@ -93,7 +83,7 @@ def initialize_logging(syslog_tag, syslog_facility, loggers,
     # Set the level and handlers for all loggers.
     for logger in cfg['loggers'].values():
         if 'handlers' not in logger:
-            logger['handlers'] = ['syslog' if use_syslog else 'console']
+            logger['handlers'] = ['console']
         if 'level' not in logger:
             logger['level'] = log_level
         if 'propagate' not in logger:
