@@ -2,6 +2,7 @@
 import getopt, sys, os
 import boto
 import boto.ec2
+import boto.ec2.elb
 import subprocess
 import time
 
