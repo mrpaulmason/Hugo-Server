@@ -43,26 +43,13 @@ settings['cookie_secret'] = "paulryanserena"
 settings['xsrf_cookies'] = True
 settings['template_loader'] = tornado.template.Loader(TEMPLATE_ROOT)
 
-SYSLOG_TAG = "boilerplate"
-
-# See PEP 391 and logconfig for formatting help.  Each section of LOGGERS
-# will get merged into the corresponding section of log_settings.py.
-# Handlers and log levels are set up automatically based on LOG_LEVEL and DEBUG
-# unless you set them here.  Messages will not propagate through a logger
-# unless propagate: True is set.
-LOGGERS = {
-   'loggers': {
-        'boilerplate': {},
-    },
-}
 
 if settings['debug']:
     LOG_LEVEL = logging.DEBUG
 else:
     LOG_LEVEL = logging.INFO
 
-logconfig.initialize_logging(SYSLOG_TAG, LOGGERS,
-        LOG_LEVEL)
+logging.getLogger().setLevel(LOG_LEVEL)
 
 if options.config:
     tornado.options.parse_config_file(options.config)
