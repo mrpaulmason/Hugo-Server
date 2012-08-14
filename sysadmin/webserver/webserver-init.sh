@@ -13,6 +13,7 @@ echo "Installing basic packages" >> /etc/webserver-init.touchdown
 
 apt-get -qy update
 apt-get -qy install git
+apt-get -qy install syslog-ng
 apt-get -qy install memcached nginx python-tornado supervisor
 
 echo "Copying key" >> /etc/webserver-init.touchdown
@@ -51,12 +52,14 @@ Host github.com
   StrictHostKeyChecking no
 EOF
 
+
 echo "Downloading code" >> /etc/webserver-init.touchdown
 git clone git@github.com:pmm25/Hugo-Server.git /var/hugo
 
 echo "Installing configuration files" >> /etc/webserver-init.touchdown
 cp "/var/hugo/sysadmin/webserver/${HUGO_ENV}/supervisord.conf" /etc/supervisor/conf.d/
 cp "/var/hugo/sysadmin/webserver/${HUGO_ENV}/nginx/nginx.conf" /etc/nginx/
+cp "/var/hugo/sysadmin/webserver/${HUGO_ENV}/syslog-ng/syslog-ng.conf" /etc/syslog-ng/
 
 /etc/init.d/supervisor stop
 
@@ -73,5 +76,9 @@ chown -R www-data /var/log/tornado
 
 /etc/init.d/nginx restart
 /etc/init.d/supervisor start
+
+echo "Setting up logging" >> /etc/webserver-init.touchdown
+curl -X POST -u rwaliany:g00gle http://hugo.loggly.com/api/inputs/24412/adddevice
+sudo service syslog-ng restart
 
 echo "FINISHED" >> /etc/webserver-init.touchdown

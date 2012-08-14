@@ -6,6 +6,7 @@ git pull
 
 cp "/var/hugo/sysadmin/webserver/${HUGO_ENV}/supervisord.conf" /etc/supervisor/conf.d/
 cp "/var/hugo/sysadmin/webserver/${HUGO_ENV}/nginx/nginx.conf" /etc/nginx/
+cp "/var/hugo/sysadmin/webserver/${HUGO_ENV}/syslog-ng/syslog-ng.conf" /etc/syslog-ng/
 
 chmod +x `find /var/hugo|grep py`
 chmod +x `find /var/hugo|grep sh`
