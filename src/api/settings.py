@@ -5,7 +5,6 @@ import os
 from tornado.options import define, options
 
 import environment
-import logconfig
 
 # Make filepaths relative to settings.
 path = lambda root,*a: os.path.join(root, *a)
