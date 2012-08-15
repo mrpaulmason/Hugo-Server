@@ -17,7 +17,7 @@ class TornadoBoilerplate(tornado.web.Application):
 
 def main():
     app = TornadoBoilerplate()
-    http_server = tornado.httpserver.HTTPServer(app)
+    http_server = tornado.httpserver.HTTPServer(app,xheaders=True)
     http_server.listen(options.port)
     tornado.ioloop.IOLoop.instance().start()
 
