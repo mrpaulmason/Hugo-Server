@@ -13,6 +13,18 @@ graph = facebook.GraphAPI(oauth_access_token)
 #    ret = graph.fql("SELECT id, author_uid, app_id, timestamp, page_id, page_type, coords, type FROM location_post WHERE (author_uid=me()) and timestamp < %d limit %d,500" % (ts, 500*page))
 #    ret = graph.fql("SELECT checkin_id, author_uid, app_id, timestamp, page_id, post_id, message, tagged_uids, coords FROM checkin WHERE (author_uid=me()) and timestamp < %d limit %d,500" % (ts, 500*page))
 
+
+query = {
+"query1" : "SELECT id, author_uid, app_id, timestamp, page_id, page_type, coords, type, tagged_uids  FROM location_post WHERE (author_uid IN (SELECT uid2 from friend where uid1=me()) or author_uid=me()) limit 0,500",
+"query2" : "SELECT page_id, name, description from page where page_id in (SELECT page_id from #query1)",
+"query3" : "SELECT name, hometown_location from user where uid in (SELECT author_uid from #query1)",
+}
+
+ret = graph.fql(query)
+print simplejson.dumps(ret, sort_keys=False, indent=2)
+
+sys.exit(1)
+
 total = 0
 friends = graph.fql("SELECT uid2 FROM friend WHERE uid1=me()")
 
