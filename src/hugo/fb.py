@@ -4,7 +4,7 @@ import time
 import simplejson
 import sys
 
-oauth_access_token="AAACEdEose0cBAOaZB4tHziIycZB7p9tp7WT45eWMwlb9ZAKo9mYU6tZCZAwiD6QCzP14icR0t7MK6w5hWSkFIXFucxZBCXjfU0ni4CLjipWAZDZD"
+oauth_access_token="AAACEdEose0cBAHfIjZARAqtwtORuEpk4xRAromzY6GgVRHyZC5qUA11BntENd59y2TW8ZCQeakQkL5kqn2ZAxhrjryS5ZANslPIRpB2XMeAZDZD"
 graph = facebook.GraphAPI(oauth_access_token)
 #json = graph.get_object("me/locations")
 
@@ -16,7 +16,7 @@ graph = facebook.GraphAPI(oauth_access_token)
 
 query = {
 "query1" : "SELECT id, author_uid, app_id, timestamp, page_id, page_type, coords, type, tagged_uids  FROM location_post WHERE (author_uid IN (SELECT uid2 from friend where uid1=me()) or author_uid=me()) limit 0,500",
-"query2" : "SELECT page_id, name, description from page where page_id in (SELECT page_id from #query1)",
+"query2" : "SELECT page_id, categories, name, website, location, checkins from page where page_id in (SELECT page_id from #query1)",
 "query3" : "SELECT name, hometown_location from user where uid in (SELECT author_uid from #query1)",
 }
 
