@@ -15,6 +15,9 @@ apt-get -qy update
 apt-get -qy install git
 apt-get -qy install syslog-ng
 apt-get -qy install memcached nginx python-tornado supervisor
+easy_install facebook-sdk
+easy_install simplejson
+
 
 echo "Copying key" >> /etc/webserver-init.touchdown
 

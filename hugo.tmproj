@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>src/api/app.py</string>
+	<string>sysadmin/hugo-admin.py</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -40,30 +40,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>25</integer>
+				<integer>52</integer>
 				<key>line</key>
-				<integer>4</integer>
+				<integer>19</integer>
 			</dict>
-			<key>columnSelection</key>
-			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
-			<key>selectFrom</key>
-			<dict>
-				<key>column</key>
-				<integer>15</integer>
-				<key>line</key>
-				<integer>4</integer>
-			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>25</integer>
-				<key>line</key>
-				<integer>4</integer>
-			</dict>
 		</dict>
 		<key>src/api/templates/base.html</key>
 		<dict>
@@ -106,6 +90,20 @@
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
+		</dict>
+		<key>sysadmin/hugo-admin.py</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>19</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>122</integer>
 		</dict>
 		<key>sysadmin/webserver/local/supervisord.conf</key>
 		<dict>
@@ -175,6 +173,7 @@
 		<string>sysadmin/webserver/webserver-update.sh</string>
 		<string>src/api/__init__.py</string>
 		<string>src/api/app.py</string>
+		<string>sysadmin/hugo-admin.py</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>
