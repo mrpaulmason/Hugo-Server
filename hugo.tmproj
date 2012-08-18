@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>sysadmin/hugo-admin.py</string>
+	<string>sysadmin/webserver/webserver-init.sh</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -21,54 +21,26 @@
 	<integer>200</integer>
 	<key>metaData</key>
 	<dict>
-		<key>src/api/__init__.py</key>
+		<key>README</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>11</integer>
 				<key>line</key>
-				<integer>0</integer>
+				<integer>3</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>src/api/app.py</key>
+		<key>bash_profile</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>52</integer>
-				<key>line</key>
-				<integer>19</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>src/api/templates/base.html</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>7</integer>
-				<key>line</key>
-				<integer>8</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>src/api/tests/run_tests.py</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
+				<integer>71</integer>
 				<key>line</key>
 				<integer>4</integer>
 			</dict>
@@ -77,75 +49,91 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>src/api/urls.py</key>
+		<key>setup.sh</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
 				<integer>1</integer>
-				<key>line</key>
-				<integer>4</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
+		</dict>
+		<key>src/hugo/__init__.py</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>src/hugo/fb.py</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>15</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>2</integer>
 		</dict>
 		<key>sysadmin/hugo-admin.py</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>49</integer>
 				<key>line</key>
-				<integer>19</integer>
+				<integer>74</integer>
 			</dict>
+			<key>columnSelection</key>
+			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>122</integer>
-		</dict>
-		<key>sysadmin/webserver/local/supervisord.conf</key>
-		<dict>
-			<key>caret</key>
+			<integer>55</integer>
+			<key>selectFrom</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>17</integer>
 				<key>line</key>
-				<integer>73</integer>
+				<integer>74</integer>
 			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>32</integer>
-		</dict>
-		<key>sysadmin/webserver/staging/supervisord.conf</key>
-		<dict>
-			<key>caret</key>
+			<key>selectTo</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>49</integer>
 				<key>line</key>
-				<integer>72</integer>
+				<integer>74</integer>
 			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>32</integer>
 		</dict>
 		<key>sysadmin/webserver/webserver-init.sh</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>23</integer>
 				<key>line</key>
-				<integer>82</integer>
+				<integer>18</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>42</integer>
+			<integer>0</integer>
 		</dict>
 		<key>sysadmin/webserver/webserver-update.sh</key>
 		<dict>
@@ -154,7 +142,7 @@
 				<key>column</key>
 				<integer>33</integer>
 				<key>line</key>
-				<integer>11</integer>
+				<integer>10</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -164,15 +152,13 @@
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>src/api/templates/base.html</string>
-		<string>src/api/tests/run_tests.py</string>
-		<string>src/api/urls.py</string>
-		<string>sysadmin/webserver/local/supervisord.conf</string>
-		<string>sysadmin/webserver/staging/supervisord.conf</string>
 		<string>sysadmin/webserver/webserver-init.sh</string>
+		<string>src/hugo/__init__.py</string>
+		<string>src/hugo/fb.py</string>
+		<string>README</string>
+		<string>bash_profile</string>
+		<string>setup.sh</string>
 		<string>sysadmin/webserver/webserver-update.sh</string>
-		<string>src/api/__init__.py</string>
-		<string>src/api/app.py</string>
 		<string>sysadmin/hugo-admin.py</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
