@@ -21,7 +21,7 @@ class AuthHandler(BaseHandler):
 
         # Connect to Facebook API and update MySQLdb
         graph = facebook.GraphAPI(fb_auth_key)
-        json = graph.get_object("me?fields=id,name,first_name,last_name,picture,friends")
+        json = graph.get_object("me", fields="id,name,first_name,last_name,picture,friends")
         
         # Update Database
         conn = MySQLdb.connect (host="hugo.caqu3caxjsdg.us-west-1.rds.amazonaws.com", user="hugo", passwd="Huego415",port=3306)

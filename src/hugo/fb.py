@@ -4,9 +4,9 @@ import time
 import simplejson
 import sys
 
-oauth_access_token="AAACEdEose0cBAHfIjZARAqtwtORuEpk4xRAromzY6GgVRHyZC5qUA11BntENd59y2TW8ZCQeakQkL5kqn2ZAxhrjryS5ZANslPIRpB2XMeAZDZD"
+oauth_access_token="BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEPQ5U4gcNYn3kZAp8kOBwyHBIvBue64eWsui5Eg7yzojWw2pvc9ZBR1vCmX"
 graph = facebook.GraphAPI(oauth_access_token)
-#json = graph.get_object("me/locations")
+json = graph.get_object("me", fields="id,name,first_name,last_name,picture,friends")
 
 #print simplejson.dumps(json, sort_keys = False, indent=2)
 #    ret = graph.fql("SELECT id, author_uid, app_id, timestamp, page_id, page_type, coords, type FROM location_post WHERE (author_uid IN (SELECT uid2 FROM friend WHERE uid1=me()) or author_uid=me()) and timestamp < %d limit %d,500" % (ts, 500*page))
