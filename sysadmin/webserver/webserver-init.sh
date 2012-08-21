@@ -15,6 +15,7 @@ apt-get -qy update
 apt-get -qy install git
 apt-get -qy install syslog-ng
 apt-get -qy install memcached nginx python-tornado supervisor
+apt-get -qy install python-setuptools
 easy_install facebook-sdk
 easy_install simplejson
 
