@@ -1,4 +1,5 @@
 from handlers.base import BaseHandler
+from tornado.escape import *
 
 import logging
 logger = logging.getLogger()
