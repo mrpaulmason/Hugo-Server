@@ -1,7 +1,7 @@
 from handlers.base import BaseHandler
 
 import logging
-logger = logging.getLogger('boilerplate.' + __name__)
+logger = logging.getLogger()
 
 
 class PlacesHandler(BaseHandler):

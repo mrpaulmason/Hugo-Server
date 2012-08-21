@@ -2,7 +2,7 @@ import json
 import tornado.web
 
 import logging
-logger = logging.getLogger('boilerplate.' + __name__)
+logger = logging.getLogger()
 
 
 class BaseHandler(tornado.web.RequestHandler):
