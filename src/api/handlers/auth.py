@@ -21,4 +21,5 @@ class AuthHandler(BaseHandler):
         json = json_encode(details)
         self.write(json)
 
+
         
