@@ -9,6 +9,9 @@ class BaseHandler(tornado.web.RequestHandler):
     """A class to collect common handler methods - all other handlers should
     subclass this one.
     """
+    
+    def check_xsrf_cookie(self):
+        pass
 
     def load_json(self):
         """Load JSON from the request body and store them in
