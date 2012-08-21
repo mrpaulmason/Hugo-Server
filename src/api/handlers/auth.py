@@ -18,8 +18,7 @@ class AuthHandler(BaseHandler):
         # Send confirmation of success
         self.content_type = 'application/json'
         details = {'status':'success', 'fb_auth_key': fb_auth_key, 'fb_expires':fb_expires}
-        json = json_encode(details)
-        self.write(json)
+        self.write(details)
 
 
         
