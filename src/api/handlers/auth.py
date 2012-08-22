@@ -44,7 +44,8 @@ class AuthHandler(BaseHandler):
                 cur.execute(query)
                 conn.commit()
         except:
-            raise tornado.web.HTTPError(403)
+            self.write(json)
+#            raise tornado.web.HTTPError(403)
         
         # Send confirmation of success
         self.content_type = 'application/json'
