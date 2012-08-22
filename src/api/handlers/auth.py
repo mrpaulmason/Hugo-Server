@@ -46,7 +46,7 @@ class AuthHandler(BaseHandler):
                 cur.execute(query)
                 conn.commit()
         except:
-            self.write("Unexpected error:" + sys.exc_info()[0])
+            self.write("Unexpected error:" + str(sys.exc_info()))
             self.write(json)
 #            raise tornado.web.HTTPError(403)
         
