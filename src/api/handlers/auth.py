@@ -27,6 +27,8 @@ class AuthHandler(BaseHandler):
         # Update Database
         conn = MySQLdb.connect (host="hugo.caqu3caxjsdg.us-west-1.rds.amazonaws.com", user="hugo", passwd="Huego415",port=3306)
         cur = conn.cursor()
+        
+        user_id = None
 
         try:
             if cur.execute("SELECT user_id FROM hugo_%s.users WHERE facebook_id = '%s'" % (os.environ['HUGO_ENV'].lower(), json['id'])) == 0:            
