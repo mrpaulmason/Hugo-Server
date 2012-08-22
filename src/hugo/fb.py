@@ -3,11 +3,40 @@ import facebook
 import time
 import simplejson
 import sys
+import MySQLdb
+import os
+import code
 
 oauth_access_token="BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEPQ5U4gcNYn3kZAp8kOBwyHBIvBue64eWsui5Eg7yzojWw2pvc9ZBR1vCmX"
 graph = facebook.GraphAPI(oauth_access_token)
 json = graph.get_object("me", fields="id,name,first_name,last_name,picture,friends")
+fb_auth_key = oauth_access_token
+fb_expires = 1000
 
+# Update Database
+conn = MySQLdb.connect (host="hugo.caqu3caxjsdg.us-west-1.rds.amazonaws.com", user="hugo", passwd="Huego415",port=3306, db=("hugo_%s"%os.environ['HUGO_ENV'].lower()))
+cur = conn.cursor()
+
+user_id = None
+
+try:
+    if cur.execute("SELECT user_id FROM hugo_%s.users WHERE facebook_id = '%s'" % (os.environ['HUGO_ENV'].lower(), json['id'])) == 0:            
+        query = ("INSERT INTO users (facebook_id, facebook_auth_key, facebook_expires, name, first_name, last_name, picture) VALUES(%s, %s, %s, %s, %s, %s, %s)")
+        cur.execute(query, (json['id'], fb_auth_key, fb_expires, json['name'], json['first_name'], json['last_name'], json['picture']['data']['url']))
+        conn.commit()
+        user_id = cur.lastrowid
+    else:
+        user_id = cur.fetchone()[0]                
+        query = ("UPDATE users SET facebook_auth_key=%s, facebook_expires=%s where user_id=%s")
+        cur.execute(query,  (fb_auth_key, fb_expires, user_id))
+        conn.commit()
+except:
+    print("Unexpected error:" + str(sys.exc_info()))
+    print(json)
+    code.interact(local=locals())
+
+
+sys.exit(2)
 #print simplejson.dumps(json, sort_keys = False, indent=2)
 #    ret = graph.fql("SELECT id, author_uid, app_id, timestamp, page_id, page_type, coords, type FROM location_post WHERE (author_uid IN (SELECT uid2 FROM friend WHERE uid1=me()) or author_uid=me()) and timestamp < %d limit %d,500" % (ts, 500*page))
 #    ret = graph.fql("SELECT id, author_uid, app_id, timestamp, page_id, page_type, coords, type FROM location_post WHERE (author_uid=me()) and timestamp < %d limit %d,500" % (ts, 500*page))

@@ -24,26 +24,24 @@ class AuthHandler(BaseHandler):
         graph = facebook.GraphAPI(fb_auth_key)
         json = graph.get_object("me", fields="id,name,first_name,last_name,picture,friends")
         
+        user_id = None
+
         # Update Database
-        conn = MySQLdb.connect (host="hugo.caqu3caxjsdg.us-west-1.rds.amazonaws.com", user="hugo", passwd="Huego415",port=3306)
+        conn = MySQLdb.connect (host="hugo.caqu3caxjsdg.us-west-1.rds.amazonaws.com", user="hugo", passwd="Huego415",port=3306, db=("hugo_%s"%os.environ['HUGO_ENV'].lower())
         cur = conn.cursor()
         
         user_id = None
 
         try:
             if cur.execute("SELECT user_id FROM hugo_%s.users WHERE facebook_id = '%s'" % (os.environ['HUGO_ENV'].lower(), json['id'])) == 0:            
-                query = ("INSERT INTO hugo_%s.users (facebook_id, facebook_auth_key, facebook_expires, name, first_name, last_name, picture, friends) VALUES('%s', '%s', %d, '%s', '%s', '%s', '%s' )" % 
-                    (os.environ['HUGO_ENV'].lower(), json['id'], fb_auth_key, int(fb_expires), json['name'], json['first_name'], json['last_name'], json['picture']['data']['url'], json['friends']))
-                self.write("executing query: %s" % query)
-                cur.execute(query)
+                query = ("INSERT INTO users (facebook_id, facebook_auth_key, facebook_expires, name, first_name, last_name, picture) VALUES(%s, %s, %s, %s, %s, %s, %s)")
+                cur.execute(query, (json['id'], fb_auth_key, fb_expires, json['name'], json['first_name'], json['last_name'], json['picture']['data']['url']))
                 conn.commit()
                 user_id = cur.lastrowid
             else:
                 user_id = cur.fetchone()[0]                
-                query = ("UPDATE hugo_%s.users SET facebook_auth_key='%s', facebook_expires='%s', friends='%s' where user_id=%s" % 
-                    (os.environ['HUGO_ENV'].lower(), fb_auth_key, fb_expires, json['friends'], user_id))
-                self.write("executing query: %s" % query)
-                cur.execute(query)
+                query = ("UPDATE users SET facebook_auth_key=%s, facebook_expires=%s where user_id=%s")
+                cur.execute(query, (fb_auth_key, fb_expires, user_id))
                 conn.commit()
         except:
             self.write("Unexpected error:" + str(sys.exc_info()))
