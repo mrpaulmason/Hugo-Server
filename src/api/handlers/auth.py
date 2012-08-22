@@ -44,9 +44,7 @@ class AuthHandler(BaseHandler):
                 cur.execute(query, (fb_auth_key, fb_expires, simplejson.dumps(json['friends']['data']), user_id))
                 conn.commit()
         except:
-            self.write("Unexpected error:" + str(sys.exc_info()))
-            self.write(json)
-#            raise tornado.web.HTTPError(403)
+            raise tornado.web.HTTPError(403)
         
         # Send confirmation of success
         self.content_type = 'application/json'
