@@ -34,14 +34,14 @@ class AuthHandler(BaseHandler):
 
         try:
             if cur.execute("SELECT user_id FROM hugo_%s.users WHERE facebook_id = '%s'" % (os.environ['HUGO_ENV'].lower(), json['id'])) == 0:            
-                query = ("INSERT INTO users (facebook_id, facebook_auth_key, facebook_expires, name, first_name, last_name, picture) VALUES(%s, %s, %s, %s, %s, %s, %s)")
-                cur.execute(query, (json['id'], fb_auth_key, fb_expires, json['name'], json['first_name'], json['last_name'], json['picture']['data']['url']))
+                query = ("INSERT INTO users (facebook_id, facebook_auth_key, facebook_expires, name, first_name, last_name, picture, friends) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)")
+                cur.execute(query, (json['id'], fb_auth_key, fb_expires, json['name'], json['first_name'], json['last_name'], json['picture']['data']['url'], simplejson.dumps(json['friends']['data'])))
                 conn.commit()
                 user_id = cur.lastrowid
             else:
                 user_id = cur.fetchone()[0]                
-                query = ("UPDATE users SET facebook_auth_key=%s, facebook_expires=%s where user_id=%s")
-                cur.execute(query, (fb_auth_key, fb_expires, user_id))
+                query = ("UPDATE users SET facebook_auth_key=%s, facebook_expires=%s, friends=%s where user_id=%s")
+                cur.execute(query, (fb_auth_key, fb_expires, simplejson.dumps(json['friends']['data']), user_id))
                 conn.commit()
         except:
             self.write("Unexpected error:" + str(sys.exc_info()))

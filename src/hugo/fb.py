@@ -27,13 +27,15 @@ try:
         user_id = cur.lastrowid
     else:
         user_id = cur.fetchone()[0]                
-        query = ("UPDATE users SET facebook_auth_key=%s, facebook_expires=%s where user_id=%s")
-        cur.execute(query,  (fb_auth_key, fb_expires, user_id))
+        query = ("UPDATE users SET facebook_auth_key=%s, facebook_expires=%s, friends=%s where user_id=%s")
+        cur.execute(query, (fb_auth_key, fb_expires, simplejson.dumps(json['friends']['data']), user_id))
         conn.commit()
 except:
     print("Unexpected error:" + str(sys.exc_info()))
-    print(json)
+    print(json['friends']['data'])
     code.interact(local=locals())
+
+code.interact(local=locals())
 
 
 sys.exit(2)
