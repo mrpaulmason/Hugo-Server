@@ -1,7 +1,7 @@
 from handlers.base import BaseHandler
 from tornado.escape import *
 import tornado.web
-import logging, os
+import logging, os, sys
 import facebook
 import time
 import simplejson
@@ -46,6 +46,7 @@ class AuthHandler(BaseHandler):
                 cur.execute(query)
                 conn.commit()
         except:
+            self.write("Unexpected error:" + sys.exc_info()[0])
             self.write(json)
 #            raise tornado.web.HTTPError(403)
         
