@@ -19,6 +19,9 @@ apt-get -qy install python-setuptools
 easy_install facebook-sdk
 easy_install simplejson
 
+curl http://python-distribute.org/distribute_setup.py | python
+curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
+pip install cloud
 
 echo "Copying key" >> /etc/webserver-init.touchdown
 
