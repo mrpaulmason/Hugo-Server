@@ -33,5 +33,5 @@ class PlacesHandler(BaseHandler):
         for item in result:
             items.append(item)
         
-        self.write(simplejson.dump(items,indent=4))
+        self.write(simplejson.dumps(items,indent=4))
         
