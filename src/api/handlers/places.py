@@ -24,14 +24,26 @@ class PlacesHandler(BaseHandler):
                                    aws_secret_access_key='DFl2zvMPXV4qQ9XuGyM9I/s9nZVmkmOBp2jT7jF6')
         table = dbconn.get_table("checkin_data")
 
-        result = table.query(
-          hash_key = 1, 
-          range_key_condition = BEGINS_WITH(geohash.encode(float(latitude), float(longitude), precision=6)))
+        precision = 6
 
-        items = []  
+        while True:
+            result = table.query(
+                hash_key = 1, 
+                range_key_condition = BEGINS_WITH(geohash.encode(float(latitude), float(longitude), precision=6)))
 
-        for item in result:
-            items.append(item)
+            items = []  
+
+            for item in result:
+                items.append(item)
         
+            
+            if len(items) < 5:
+                precision = precision - 1
+                continue
+            else:
+                break
+
         self.write(simplejson.dumps(items,indent=4))
+        
+        
         
