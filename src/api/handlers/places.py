@@ -26,7 +26,7 @@ class PlacesHandler(BaseHandler):
 
         result = table.query(
           hash_key = 1, 
-          range_key_condition = BEGINS_WITH(geohash.encode(latitude, longitude, precision=6)))
+          range_key_condition = BEGINS_WITH(geohash.encode(float(latitude), float(longitude), precision=6)))
 
         items = []  
 
