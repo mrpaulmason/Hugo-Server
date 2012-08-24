@@ -16,13 +16,13 @@ apt-get -qy install git
 apt-get -qy install syslog-ng
 apt-get -qy install memcached nginx python-tornado supervisor
 apt-get -qy install python-setuptools
+apt-get -qy install python-geohash
 easy_install facebook-sdk
 easy_install simplejson
 
 curl http://python-distribute.org/distribute_setup.py | python
 curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
 pip install cloud
-pip install python-geohash
 
 echo "Copying key" >> /etc/webserver-init.touchdown
 
