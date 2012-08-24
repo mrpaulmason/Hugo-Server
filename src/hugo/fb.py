@@ -12,6 +12,8 @@ import boto.dynamodb
 import datetime
 import cloud
 import geohash
+from boto.dynamodb.condition import *
+
 
 oauth_access_token="BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEPQ5U4gcNYn3kZAp8kOBwyHBIvBue64eWsui5Eg7yzojWw2pvc9ZBR1vCmX"
 
@@ -114,6 +116,32 @@ if __name__ == "__main__":
     
 
 """
+import boto.dynamodb
+import time, simplejson
+
+from boto.dynamodb.condition import *
+
+b = time.time()
+
+dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
+                           aws_secret_access_key='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')
+table = dbconn.get_table("checkin_data")
+
+result = table.query(
+  hash_key = 1, 
+  range_key_condition = BETWEEN("9q8yy", "9q8yy{"))
+
+items = []  
+  
+for item in result:
+    items.append(item)
+
+
+f = time.time()
+print simplejson.dumps(items, indent=4)
+print len(item), f-b
+
+
 
 graph = facebook.GraphAPI(oauth_access_token)
 

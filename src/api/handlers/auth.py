@@ -16,6 +16,7 @@ class AuthHandler(BaseHandler):
     def get(self):
         self.write("Error, no parameters were passed")
     
+    # TODO: Vulnerable for injection
     def post(self):
         fb_auth_key = self.get_argument("fb_auth_key", "")
         fb_expires = self.get_argument("fb_expires", "")
