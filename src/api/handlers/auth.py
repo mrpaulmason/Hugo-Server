@@ -52,7 +52,7 @@ class AuthHandler(BaseHandler):
         except:
             raise tornado.web.HTTPError(403)
             
-        if addedUser:
+        if added_user:
             hugo.fb.processCheckins(user_id, fb_auth_key)
         
         # Send confirmation of success
