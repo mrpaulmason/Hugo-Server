@@ -28,7 +28,7 @@ class PlacesHandler(BaseHandler):
 
         while True:
             result = table.query(
-                hash_key = 1, 
+                hash_key = hugo_id, 
                 range_key_condition = BEGINS_WITH(geohash.encode(float(latitude), float(longitude), precision=precision)))
 
             items = []  
