@@ -27,8 +27,8 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
     
     query = {
     "query1" : "SELECT id, author_uid, app_id, timestamp, page_id, page_type, coords, type, tagged_uids  FROM location_post WHERE (author_uid IN (SELECT uid2 from friend where uid1=me()) or author_uid=me()) and timestamp < "+str(timestamp)+" and timestamp > "+str(timestamp-delta)+" limit "+str(page*num_results)+","+str(num_results),
-    "query2" : "SELECT page_id, categories, name, website, location, checkins from page where page_id in (SELECT page_id from #query1)",
-    "query3" : "SELECT uid, name from user where uid in (SELECT author_uid from #query1)",
+    "query2" : "SELECT page_id, categories, name, website, location, checkins, phone, hours, price_range, pic, parking, fan_count from page where page_id in (SELECT page_id from #query1)",
+    "query3" : "SELECT uid, name, pic_small, sex, relationship_status, significant_other_id, activities, interests, is_app_user, mutual_friend_count from user where uid in (SELECT author_uid from #query1)",
     }
     
     ret = graph.fql(query)
@@ -55,7 +55,7 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
     for item in query1:
         item['user_id'] = hugo_id
         try:
-            item['geohash'] = geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13)
+            item['geohash'] = geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13) + "_" + str(item['id'])
         except:
             continue
 
@@ -65,7 +65,7 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
                   item.pop(k)
               else:
                   item[k] = str(v)        
-           elif v == "":
+           elif v == "" or v == None:
               item.pop(k)
 
         try:
@@ -73,7 +73,7 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
             dItem.put()
         except:
             dItem = table.new_item(hash_key=hugo_id, range_key=item['geohash'], attrs=item) 
-            dItem.put()            
+            dItem.put()
                     
     return None
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     tmp_ts = ts
     pg = 0
     delta = 3600*24*21
-    numMonths = 34    
+    numMonths = 34
 
     hugo_ids = []
     oauth_tokens = []
@@ -105,6 +105,8 @@ if __name__ == "__main__":
         numMonths = numMonths -1
         
     jids = cloud.map(query_checkins, hugo_ids, oauth_tokens, times, deltas, _env="hugo")
+    
+#    print simplejson.dumps(cloud.result(jids[0]), indent=4)
         
 #    for ret in cloud.iresult(jids):
 #        print len(ret)
@@ -128,13 +130,13 @@ dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4
 table = dbconn.get_table("checkin_data")
 
 result = table.query(
-  hash_key = 1, 
-  range_key_condition = BETWEEN("9q8yy", "9q8yy{"))
+  hash_key = 1) 
+#  range_key_condition = BETWEEN("9q8yy", "9q8yy{"))
 
 items = []  
   
 for item in result:
-    items.append(item)
+    item.delete()
 
 
 f = time.time()
