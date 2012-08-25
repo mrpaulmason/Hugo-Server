@@ -28,7 +28,7 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
     query = {
     "query1" : "SELECT id, author_uid, app_id, timestamp, page_id, page_type, coords, type, tagged_uids  FROM location_post WHERE (author_uid IN (SELECT uid2 from friend where uid1=me()) or author_uid=me()) and timestamp < "+str(timestamp)+" and timestamp > "+str(timestamp-delta)+" limit "+str(page*num_results)+","+str(num_results),
     "query2" : "SELECT page_id, categories, name, website, location, checkins, phone, hours, price_range, pic, parking, fan_count from page where page_id in (SELECT page_id from #query1)",
-    "query3" : "SELECT uid, name, pic_small, sex, relationship_status, significant_other_id, activities, interests, is_app_user, mutual_friend_count from user where uid in (SELECT author_uid from #query1)",
+    "query3" : "SELECT uid, name, pic_small, sex, relationship_status, significant_other_id, activities, interests, is_app_user, friend_count, mutual_friend_count, current_location, hometown_location, devices from user where uid in (SELECT author_uid from #query1)",
     }
     
     ret = graph.fql(query)
@@ -50,12 +50,16 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
     dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
                             aws_secret_access_key='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')
     table = dbconn.get_table("checkin_data")
-
+    
+    print simplejson.dumps(query1, indent=4)
 
     for item in query1:
         item['user_id'] = hugo_id
+        
+        # Ignore the item if it has no coordinates
         try:
-            item['geohash'] = geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13) + "_" + str(item['id'])
+            item['geohash'] = geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13)
+            item['geohash_checkin'] = geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13) + "_" + str(item['id'])
         except:
             continue
 
@@ -69,23 +73,16 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
               item.pop(k)
 
         try:
-            dItem = table.new_item(hash_key=hugo_id, range_key=item['geohash'], attrs=item) 
+            dItem = table.new_item(hash_key=hugo_id, range_key=item['geohash_checkin'], attrs=item) 
             dItem.put()
         except:
-            dItem = table.new_item(hash_key=hugo_id, range_key=item['geohash'], attrs=item) 
+            dItem = table.new_item(hash_key=hugo_id, range_key=item['geohash_checkin'], attrs=item) 
             dItem.put()
                     
     return None
 
-
-# 7038 checkins with 31 days
-# 7355 checkins with 3 weeks
-
-if __name__ == "__main__":    
-    results = []    
-    ts = int(time.time())
-    tmp_ts = ts
-    pg = 0
+def processCheckins(hugo_id, oauth_access_token):
+    tmp_ts = int(time.time())
     delta = 3600*24*21
     numMonths = 34
 
@@ -93,21 +90,26 @@ if __name__ == "__main__":
     oauth_tokens = []
     times = []
     deltas = []
- 
-#    tmp_results = query_checkins(oauth_access_token, pg, 500, tmp_ts, delta)    
-
+    
     while numMonths > 0:        
-        hugo_ids.append(1)
+        hugo_ids.append(hugo_id)
         oauth_tokens.append(oauth_access_token)
         times.append(tmp_ts)
         deltas.append(delta)
         tmp_ts = tmp_ts - delta         
-        numMonths = numMonths -1
-        
+        numMonths = numMonths -1    
+
     jids = cloud.map(query_checkins, hugo_ids, oauth_tokens, times, deltas, _env="hugo")
+
+
+# 7038 checkins with 31 days
+# 7355 checkins with 3 weeks
+
+if __name__ == "__main__":    
+    processCheckins(1, oauth_access_token)
     
 #    print simplejson.dumps(cloud.result(jids[0]), indent=4)
-        
+#query_checkins(1, "BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEPQ5U4gcNYn3kZAp8kOBwyHBIvBue64eWsui5Eg7yzojWw2pvc9ZBR1vCmX", int(time.time())-3600*24*21*3, 3600*24*21)        
 #    for ret in cloud.iresult(jids):
 #        print len(ret)
 #        results.extend(ret)

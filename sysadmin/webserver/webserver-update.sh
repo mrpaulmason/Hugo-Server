@@ -13,6 +13,7 @@ chmod +x `find /var/hugo|grep sh`
 rm -rf /var/www
 mkdir -p /var/www
 cp -rf /var/hugo/src/api/* /var/www/
+cp -rf /var/hugo/src/hugo /var/www
 
 /etc/init.d/nginx restart
 /etc/init.d/supervisor stop

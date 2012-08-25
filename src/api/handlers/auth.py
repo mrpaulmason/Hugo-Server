@@ -7,6 +7,7 @@ import time
 import simplejson
 import sys
 import MySQLdb
+import hugo.fb
 
 
 logger = logging.getLogger()
@@ -32,6 +33,8 @@ class AuthHandler(BaseHandler):
         cur = conn.cursor()
         
         user_id = None
+        
+        added_user = False
 
         try:
             if cur.execute("SELECT user_id FROM hugo_%s.users WHERE facebook_id = '%s'" % (os.environ['HUGO_ENV'].lower(), json['id'])) == 0:            
@@ -39,13 +42,18 @@ class AuthHandler(BaseHandler):
                 cur.execute(query, (json['id'], fb_auth_key, fb_expires, json['name'], json['first_name'], json['last_name'], json['picture']['data']['url'], simplejson.dumps(json['friends']['data'])))
                 conn.commit()
                 user_id = cur.lastrowid
+                added_user = True
             else:
                 user_id = cur.fetchone()[0]                
                 query = ("UPDATE users SET facebook_auth_key=%s, facebook_expires=%s, friends=%s where user_id=%s")
                 cur.execute(query, (fb_auth_key, fb_expires, simplejson.dumps(json['friends']['data']), user_id))
                 conn.commit()
+                added_user = False
         except:
             raise tornado.web.HTTPError(403)
+            
+        if addedUser:
+            hugo.fb.processCheckins(user_id, fb_auth_key)
         
         # Send confirmation of success
         self.content_type = 'application/json'

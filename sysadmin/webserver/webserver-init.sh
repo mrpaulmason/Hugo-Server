@@ -81,6 +81,7 @@ chmod +x `find /var/hugo|grep sh`
 mkdir -p /var/log/tornado
 mkdir -p /var/www
 cp -rf /var/hugo/src/api/* /var/www/
+cp -rf /var/hugo/src/hugo /var/www
 
 chown -R www-data /var/log/tornado
 
