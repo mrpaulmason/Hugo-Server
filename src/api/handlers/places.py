@@ -43,7 +43,7 @@ class PlacesHandler(BaseHandler):
             else:
                 break
 
-        self.content_type = 'application/json'
+        self.set_header("Content-Type", "application/json; charset=UTF-8")
         self.write(simplejson.dumps(items,sort_keys=True, indent=4))
         
         
