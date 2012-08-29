@@ -43,7 +43,8 @@ class PlacesHandler(BaseHandler):
             else:
                 break
 
-        self.write(simplejson.dumps(items,sort_keys=True, indent=4))
+        self.content_type = 'application/json'
+        self.write(items)
         
         
         
