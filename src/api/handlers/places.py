@@ -51,8 +51,10 @@ class PlacesHandler(BaseHandler):
                     continue
                 
                 for pItem in items:
-                    if levenshtein(item['spot_name'], pItem['spot_name']) <= 2:
+                    if levenshtein(item['spot_name'], pItem['spot_name']) <= 4:
                         found = pItem
+                    else:
+                        print item['spot_name'], pItem['spot_name'],levenshtein(item['spot_name'], pItem['spot_name'])
 
                 if found != None:
                     found['authors'].append(item['author_uid'])
