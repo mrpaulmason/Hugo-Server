@@ -46,6 +46,10 @@ class PlacesHandler(BaseHandler):
 
             for item in result:
                 found = None
+                
+                if 'spot_name' not in item:
+                    continue
+                
                 for pItem in items:
                     if levenshtein(item['spot_name'], pItem['spot_name']) <= 2:
                         found = pItem
@@ -56,7 +60,7 @@ class PlacesHandler(BaseHandler):
                     item['authors'] = [item['author_uid']]
                     items.append(item)        
             
-            if len(result) < 5:
+            if len(items) < 5:
                 precision = precision - 1
                 continue
             else:
