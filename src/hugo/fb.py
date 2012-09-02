@@ -68,7 +68,7 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
               if len(v) == 0:
                   item.pop(k)
               else:
-                  item[k] = str(v)        
+                  item[k] = simplejson.dumps(v)        
            elif v == "" or v == None:
               item.pop(k)
 
@@ -101,7 +101,7 @@ def processCheckins(hugo_id, oauth_access_token):
         tmp_ts = tmp_ts - delta         
         numMonths = numMonths -1    
 
-    jids = cloud.map(query_checkins, hugo_ids, oauth_tokens, times, deltas, _env="hugo")
+    jids = cloud.map(query_checkins, hugo_ids, oauth_tokens, times, deltas, _env="hugo", _profile=True)
 
 
 # 7038 checkins with 31 days
