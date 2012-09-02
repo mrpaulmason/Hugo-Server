@@ -8,6 +8,17 @@ import geohash
 import logging
 logger = logging.getLogger()
 
+def levenshtein(seq1, seq2):
+    oneago = None
+    thisrow = range(1, len(seq2) + 1) + [0]
+    for x in xrange(len(seq1)):
+        twoago, oneago, thisrow = oneago, thisrow, [0] * len(seq2) + [x + 1]
+        for y in xrange(len(seq2)):
+            delcost = oneago[y] + 1
+            addcost = thisrow[y - 1] + 1
+            subcost = oneago[y - 1] + (seq1[x] != seq2[y])
+            thisrow[y] = min(delcost, addcost, subcost)
+    return thisrow[len(seq2) - 1]
 
 class PlacesHandler(BaseHandler):
     def get(self):
@@ -34,10 +45,18 @@ class PlacesHandler(BaseHandler):
             items = []  
 
             for item in result:
-                items.append(item)
-        
+                found = None
+                for pItem in items:
+                    if levenshtein(item['spot_name'], pItem['spot_name']) <= 2:
+                        found = pItem
+
+                if found != None:
+                    found['authors'].append(item['author_uid'])
+                else:
+                    item['authors'] = [item['author_uid']]
+                    items.append(item)        
             
-            if len(items) < 5:
+            if len(result) < 5:
                 precision = precision - 1
                 continue
             else:
