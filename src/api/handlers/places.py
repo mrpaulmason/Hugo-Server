@@ -58,8 +58,10 @@ class PlacesHandler(BaseHandler):
 
                 if found != None:
                     found['authors'].append(item['author_uid'])
+                    found['pics'].append(item['person_pic_small'])
                 else:
                     item['authors'] = [item['author_uid']]
+                    item['pics'] = [item['person_pic_small']]
                     items.append(item)        
             
             if len(items) < 5:
