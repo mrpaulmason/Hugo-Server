@@ -31,6 +31,8 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
     "query2" : "SELECT page_id, categories, name, website, location, checkins, phone, hours, price_range, pic, parking, fan_count from page where page_id in (SELECT page_id from #query1)",
     "query3" : "SELECT uid, name, pic_small, sex, relationship_status, significant_other_id, activities, interests, is_app_user, friend_count, mutual_friend_count, current_location, hometown_location, devices from user where uid in (SELECT author_uid from #query1)",
     "query4" : "SELECT object_id, src_big, src_big_width, src_big_height from photo where object_id in (SELECT id from #query1)",
+    "query5" : "SELECT status_id, message from status where status_id in (SELECT id from #query1)",
+    "query6" : "SELECT checkin_id, message from checkin where checkin_id in (SELECT id from #query1)",
     }
     
     try:
@@ -42,6 +44,8 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
     query2 = ret[1]['fql_result_set']
     query3 = ret[2]['fql_result_set']
     query4 = ret[3]['fql_result_set']
+    query5 = ret[4]['fql_result_set']
+    query6 = ret[5]['fql_result_set']
         
     for i in range(0,len(query1)):
         for j in range(0,len(query2)):
@@ -56,6 +60,16 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
             if query4[j]['object_id'] == query1[i]['id']:
                 for key in query4[j]:
                     query1[i]['photo_'+key] = query4[j][key]
+        for j in range(0,len(query5)):
+            if query5[j]['status_id'] == query1[i]['id']:
+                for key in query5[j]:
+                    query1[i]['status_'+key] = query5[j][key]
+        for j in range(0,len(query6)):
+            if query6[j]['checkin_id'] == query1[i]['id']:
+                for key in query6[j]:
+                    query1[i]['checkin_'+key] = query6[j][key]
+
+
 
                                                         
     dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
@@ -63,6 +77,7 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
     table = dbconn.get_table("checkin_data")
     
     print simplejson.dumps(query1, indent=4)
+    print simplejson.dumps(query4, indent=4)
 
     for item in query1:
         item['user_id'] = hugo_id
@@ -119,10 +134,10 @@ def processCheckins(hugo_id, oauth_access_token):
 # 7355 checkins with 3 weeks
 
 if __name__ == "__main__":    
-#    processCheckins(1, oauth_access_token)
+    processCheckins(1, oauth_access_token)
     
 #    print simplejson.dumps(cloud.result(jids[0]), indent=4)
-    query_checkins(1, "BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEPQ5U4gcNYn3kZAp8kOBwyHBIvBue64eWsui5Eg7yzojWw2pvc9ZBR1vCmX", int(time.time()), 3600*24*7)        
+#    query_checkins(1, "BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEPQ5U4gcNYn3kZAp8kOBwyHBIvBue64eWsui5Eg7yzojWw2pvc9ZBR1vCmX", int(time.time()), 3600*24*7)        
 #    for ret in cloud.iresult(jids):
 #        print len(ret)
 #        results.extend(ret)
