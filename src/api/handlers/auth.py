@@ -31,6 +31,8 @@ class AuthHandler(BaseHandler):
         else:
             location_data = None
         
+        location_data = None
+        
         user_id = None
 
         # Update Database
