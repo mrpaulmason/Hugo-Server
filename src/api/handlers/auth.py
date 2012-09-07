@@ -28,7 +28,7 @@ class AuthHandler(BaseHandler):
         
         if 'location' in json:
             location_data = graph.get_object(json['location']['id'], fields="location")       
-        else
+        else:
             location_data = None
         
         user_id = None
