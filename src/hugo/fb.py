@@ -38,6 +38,7 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
     try:
         ret = graph.fql(query)
     except:
+        time.sleep(3)
         ret = graph.fql(query)
     
     query1 = ret[0]['fql_result_set']
