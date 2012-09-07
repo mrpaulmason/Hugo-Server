@@ -30,9 +30,7 @@ class AuthHandler(BaseHandler):
             location_data = graph.get_object(json['location']['id'], fields="location")       
         else:
             location_data = None
-        
-        location_data = None
-        
+                
         user_id = None
 
         # Update Database
