@@ -24,19 +24,25 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
     
 
     #print simplejson.dumps(json, sort_keys = False, indent=2)
+    #select latitude, longitude, name from place where page_id='114952118516947' to get current location latitude, longitude
     
     query = {
     "query1" : "SELECT id, author_uid, app_id, timestamp, page_id, page_type, coords, type, tagged_uids  FROM location_post WHERE (author_uid IN (SELECT uid2 from friend where uid1=me()) or author_uid=me()) and timestamp < "+str(timestamp)+" and timestamp > "+str(timestamp-delta)+" limit "+str(page*num_results)+","+str(num_results),
     "query2" : "SELECT page_id, categories, name, website, location, checkins, phone, hours, price_range, pic, parking, fan_count from page where page_id in (SELECT page_id from #query1)",
     "query3" : "SELECT uid, name, pic_small, sex, relationship_status, significant_other_id, activities, interests, is_app_user, friend_count, mutual_friend_count, current_location, hometown_location, devices from user where uid in (SELECT author_uid from #query1)",
+    "query4" : "SELECT object_id, src_big, src_big_width, src_big_height from photo where object_id in (SELECT id from #query1)",
     }
     
-    ret = graph.fql(query)
+    try:
+        ret = graph.fql(query)
+    except:
+        ret = graph.fql(query)
     
     query1 = ret[0]['fql_result_set']
     query2 = ret[1]['fql_result_set']
     query3 = ret[2]['fql_result_set']
-    
+    query4 = ret[3]['fql_result_set']
+        
     for i in range(0,len(query1)):
         for j in range(0,len(query2)):
             if query2[j]['page_id'] == query1[i]['page_id']:
@@ -46,6 +52,11 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
             if query3[j]['uid'] == query1[i]['author_uid']:
                 for key in query3[j]:
                     query1[i]['person_'+key] = query3[j][key]
+        for j in range(0,len(query4)):
+            if query4[j]['object_id'] == query1[i]['id']:
+                for key in query4[j]:
+                    query1[i]['photo_'+key] = query4[j][key]
+
                                                         
     dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
                             aws_secret_access_key='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')
@@ -108,10 +119,10 @@ def processCheckins(hugo_id, oauth_access_token):
 # 7355 checkins with 3 weeks
 
 if __name__ == "__main__":    
-    processCheckins(1, oauth_access_token)
+#    processCheckins(1, oauth_access_token)
     
 #    print simplejson.dumps(cloud.result(jids[0]), indent=4)
-#query_checkins(1, "BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEPQ5U4gcNYn3kZAp8kOBwyHBIvBue64eWsui5Eg7yzojWw2pvc9ZBR1vCmX", int(time.time())-3600*24*21*3, 3600*24*21)        
+    query_checkins(1, "BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEPQ5U4gcNYn3kZAp8kOBwyHBIvBue64eWsui5Eg7yzojWw2pvc9ZBR1vCmX", int(time.time()), 3600*24*7)        
 #    for ret in cloud.iresult(jids):
 #        print len(ret)
 #        results.extend(ret)

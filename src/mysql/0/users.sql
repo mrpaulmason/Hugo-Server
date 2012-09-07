@@ -6,6 +6,7 @@ CREATE TABLE `users` (
   `name` VARCHAR(129),
   `first_name` VARCHAR(64),
   `last_name` VARCHAR(64),
+  `current_location` VARCHAR(64),
   `picture` VARCHAR(255),
   `friends` LONGTEXT,
   PRIMARY KEY (`user_id`)
