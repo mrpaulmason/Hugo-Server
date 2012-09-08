@@ -50,6 +50,9 @@ class PlacesHandler(BaseHandler):
                 if 'spot_name' not in item:
                     continue
                 
+                if 'person_pic_square' not in item:
+                    continue
+                
                 for pItem in items:
                     if levenshtein(item['spot_name'], pItem['spot_name']) <= 4:
                         found = pItem
@@ -57,7 +60,7 @@ class PlacesHandler(BaseHandler):
                 if found != None:
                     found['authors'].append(item['author_uid'])
                     found['pics'].append(item['person_pic_square'])
-                elif 'person_pic_square' in item:
+                else:
                     item['authors'] = [item['author_uid']]
                     item['pics'] = [item['person_pic_square']]
                     items.append(item)        
