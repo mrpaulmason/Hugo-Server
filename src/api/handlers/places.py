@@ -113,8 +113,19 @@ class CategoriesHandler(BaseHandler):
                     range_key_condition = BEGINS_WITH(geohash.encode(float(latitude), float(longitude), precision=precision)))
 
             cats = []  
+            
 
             for item in result:
+                
+                if 'geohash_raw' not in item:
+                    continue
+                
+                if 'spot_name' not in item:
+                    continue
+                
+                if 'person_pic_square' not in item:
+                    continue
+                    
                 try:
                     item_categories = simplejson.loads(item['spot_categories'])
                     for cat in item_categories:
@@ -142,6 +153,7 @@ class CategoriesHandler(BaseHandler):
                 continue
             else:
                 break
+
 
         self.set_header("Content-Type", "application/json; charset=UTF-8")
         self.write(simplejson.dumps(cats,sort_keys=True, indent=4))
