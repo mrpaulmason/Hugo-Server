@@ -85,7 +85,7 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
         
         # Ignore the item if it has no coordinates
         try:
-            item['geohash'] = geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13)
+            item['geohash_raw'] = geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13)
             item['geohash_checkin'] = geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13) + "_" + str(item['id'])
         except:
             continue

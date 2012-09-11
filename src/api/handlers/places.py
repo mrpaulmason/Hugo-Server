@@ -47,6 +47,9 @@ class PlacesHandler(BaseHandler):
 
             for item in result:
                 found = None
+
+                if 'geohash_raw' not in item:
+                    continue
                 
                 if 'spot_name' not in item:
                     continue
@@ -55,16 +58,23 @@ class PlacesHandler(BaseHandler):
                     continue
                 
                 for pItem in items:
-                    if levenshtein(item['spot_name'], pItem['spot_name']) <= 4:
+                    if levenshtein(item['spot_name'], pItem['spot_name'])+levenshtein(item['geohash_raw'], pItem['geohash_raw']) <= 8:
                         found = pItem
 
                 if found != None:
+                    
+                    if len(found['spot_location']) < item['spot_location']:
+                        found['spot_location'] = item['spot_location']
+                    
                     found['authors'].append(item['author_uid'])
                     found['pics'].append(item['person_pic_square'])
                 else:
                     item['authors'] = [item['author_uid']]
                     item['pics'] = [item['person_pic_square']]
                     items.append(item)        
+            
+            items = sorted(items, key=operator.itemgetter('spot_checkins'))
+            items.reverse()
             
             if len(items) < 5:
                 precision = precision - 1
