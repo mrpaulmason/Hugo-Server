@@ -40,11 +40,7 @@ class PlacesHandler(BaseHandler):
         precision = 6
 
         while True:
-            
-            if precision == 4:
-                items = []
-                break
-            
+                        
             result = table.query(
                 hash_key = int(hugo_id), 
                 range_key_condition = BEGINS_WITH(geohash.encode(float(latitude), float(longitude), precision=precision)))
@@ -85,7 +81,7 @@ class PlacesHandler(BaseHandler):
             items = sorted(items, key=operator.itemgetter('spot_checkins'))
             items.reverse()
             
-            if len(items) < 1:
+            if len(items) < 5 and precision > 5:
                 precision = precision - 1
                 continue
             else:
@@ -141,7 +137,7 @@ class CategoriesHandler(BaseHandler):
         
             cats = [x for (x, a) in sorted_cats]
 
-            if len(cats) < 5:
+            if len(cats) < 5 and precision > 5:
                 precision = precision - 1
                 continue
             else:
