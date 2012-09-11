@@ -1,5 +1,6 @@
 from handlers.base import BaseHandler
 from boto.dynamodb.condition import *
+import code, operator
 
 import boto.dynamodb
 import time, simplejson
@@ -74,5 +75,59 @@ class PlacesHandler(BaseHandler):
         self.set_header("Content-Type", "application/json; charset=UTF-8")
         self.write(simplejson.dumps(items,sort_keys=True, indent=4))
         
+class CategoriesHandler(BaseHandler):
+    def get(self):
+        self.write("Error, no parameters were passed")
+
+    # TODO: Need key signatuare to prevent data theft
+    def post(self):
+        hugo_id = self.get_argument("hugo_id", "1")
+        latitude = self.get_argument("lat", "37.7621353")
+        longitude = self.get_argument("long", "-122.4661777")
+        signature = self.get_argument("signature","")
+
+        dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
+                                   aws_secret_access_key='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')
+        table = dbconn.get_table("checkin_data")
+
+        precision = 6
+
+        while True:
+            result = table.query(
+                    hash_key = int(hugo_id), 
+                    range_key_condition = BEGINS_WITH(geohash.encode(float(latitude), float(longitude), precision=precision)))
+
+            cats = []  
+
+            for item in result:
+                try:
+                    item_categories = simplejson.loads(item['spot_categories'])
+                    for cat in item_categories:
+                        cats.append(cat['name'])
+                except:
+                    pass
+
+            cat_hash = {}
         
+            for item in cats:
+                if item in cat_hash:
+                    cat_hash[item] = cat_hash[item] + 1
+                else:
+                    cat_hash[item] = 1
+
+            sorted_cats = sorted(cat_hash.iteritems(), key=operator.itemgetter(1))
+            sorted_cats.reverse()
+        
+            print sorted_cats
+        
+            cats = [x for (x, a) in sorted_cats]
+
+            if len(cats) < 5:
+                precision = precision - 1
+                continue
+            else:
+                break
+
+        self.set_header("Content-Type", "application/json; charset=UTF-8")
+        self.write(simplejson.dumps(cats,sort_keys=True, indent=4))
         
