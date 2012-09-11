@@ -30,6 +30,7 @@ class PlacesHandler(BaseHandler):
         hugo_id = self.get_argument("hugo_id", "1")
         latitude = self.get_argument("lat", "37.7621353")
         longitude = self.get_argument("long", "-122.4661777")
+        category = self.get_argument("category","")
         signature = self.get_argument("signature","")
         
         dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
@@ -39,6 +40,11 @@ class PlacesHandler(BaseHandler):
         precision = 6
 
         while True:
+            
+            if precision == 4:
+                items = []
+                break
+            
             result = table.query(
                 hash_key = int(hugo_id), 
                 range_key_condition = BEGINS_WITH(geohash.encode(float(latitude), float(longitude), precision=precision)))
@@ -47,6 +53,9 @@ class PlacesHandler(BaseHandler):
 
             for item in result:
                 found = None
+
+                if 'spot_categories' not in item or item['spot_categories'].find(category) == -1:
+                    continue
 
                 if 'geohash_raw' not in item:
                     continue
