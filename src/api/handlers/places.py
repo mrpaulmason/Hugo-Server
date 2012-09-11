@@ -63,7 +63,8 @@ class PlacesHandler(BaseHandler):
                     continue
                 
                 for pItem in items:
-                    if levenshtein(item['spot_name'], pItem['spot_name'])+levenshtein(item['geohash_raw'], pItem['geohash_raw']) <= 8:
+                    if levenshtein(item['spot_name'], pItem['spot_name'])/float(max(len(item['spot_name']), len(pItem['spot_name']))) > 0.50 and 
+                        levenshtein(item['geohash_raw'], pItem['geohash_raw'])/13.0 > 0.50:
                         found = pItem
 
                 if found != None:
