@@ -32,7 +32,7 @@ class PlacesHandler(BaseHandler):
         longitude = self.get_argument("long", "-122.4661777")
         category = self.get_argument("category","")
         signature = self.get_argument("signature","")
-        
+                
         dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
                                    aws_secret_access_key='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')
         table = dbconn.get_table("checkin_data")
@@ -50,7 +50,7 @@ class PlacesHandler(BaseHandler):
                 range_key_condition = BEGINS_WITH(geohash.encode(float(latitude), float(longitude), precision=precision)))
 
             items = []  
-
+            
             for item in result:
                 found = None
 
@@ -85,7 +85,7 @@ class PlacesHandler(BaseHandler):
             items = sorted(items, key=operator.itemgetter('spot_checkins'))
             items.reverse()
             
-            if len(items) < 5:
+            if len(items) < 1:
                 precision = precision - 1
                 continue
             else:
