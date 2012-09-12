@@ -66,7 +66,7 @@ class PlacesHandler(BaseHandler):
                     spotMatch = levenshtein(item['spot_name'], pItem['spot_name'])/float(max(len(item['spot_name']), len(pItem['spot_name'])))
                     locationMatch = levenshtein(item['geohash_raw'], pItem['geohash_raw'])/13.0
                     
-                    if spotMatch > 0.50 and locationMatch > 0.50:
+                    if spotMatch < 0.50 and locationMatch < 0.50:
                         found = pItem
 
                 if found != None:
