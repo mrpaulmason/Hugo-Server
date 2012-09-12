@@ -33,7 +33,7 @@ class PlacesHandler(BaseHandler):
         category = self.get_argument("category","")
         signature = self.get_argument("signature","")
         
-        if category == "All nearby":
+        if category == "All Nearby":
             category = ""
                 
         dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
@@ -163,7 +163,7 @@ class CategoriesHandler(BaseHandler):
             else:
                 break
 
-        cats.insert(0,"All nearby")
+        cats.insert(0,"All Nearby")
 
         self.set_header("Content-Type", "application/json; charset=UTF-8")
         self.write(simplejson.dumps(cats,sort_keys=True, indent=4))
