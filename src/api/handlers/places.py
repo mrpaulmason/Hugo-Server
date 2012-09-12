@@ -32,6 +32,9 @@ class PlacesHandler(BaseHandler):
         longitude = self.get_argument("long", "-122.4661777")
         category = self.get_argument("category","")
         signature = self.get_argument("signature","")
+        
+        if category == "all":
+            category = ""
                 
         dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
                                    aws_secret_access_key='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')
@@ -160,6 +163,7 @@ class CategoriesHandler(BaseHandler):
             else:
                 break
 
+        cats.insert(0,"All")
 
         self.set_header("Content-Type", "application/json; charset=UTF-8")
         self.write(simplejson.dumps(cats,sort_keys=True, indent=4))
