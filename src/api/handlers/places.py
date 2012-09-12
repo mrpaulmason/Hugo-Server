@@ -71,8 +71,11 @@ class PlacesHandler(BaseHandler):
 
                 if found != None:
                     
-                    if len(found['spot_location']) < item['spot_location']:
+                    if len(found['spot_location']) < len(item['spot_location']):
                         found['spot_location'] = item['spot_location']
+
+                    if found['spot_checkins'] < item['spot_checkins']:
+                        found['spot_checkins'] = item['spot_checkins']
                     
                     found['authors'].append(item['author_uid'])
                     found['pics'].append(item['person_pic_square'])
