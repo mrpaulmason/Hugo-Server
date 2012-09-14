@@ -53,38 +53,39 @@ def updateCheckins(hugo_id, dbconn, data):
                         'author_name' : item['person_name'],
                         'author_image' : item['person_pic_square'],
                         'timestamp' : item['timestamp'],
+                        'type' : item['type'],
+                        'spot_name' : item['spot_name'],
                         'tagged_uids' : simplejson.dumps(item['tagged_uids']),
                         'spot_categories' : simplejson.dumps(item['spot_categories']),
                         'spot_location' : simplejson.dumps(item['spot_location']),
                         'spot_hours' : simplejson.dumps(item['spot_hours']),
-                        'spot_name' : simplejson.dumps(item['spot_name']),
                         'spot_phone' : simplejson.dumps(item['spot_phone']),
-                        'spot_website' : simplejson.dumps(item['spot_website']),
-                        'spot_type' : simplejson.dumps(item['type'])
+                        'spot_website' : simplejson.dumps(item['spot_website'])
             }
             
-            if item_attr['spot_type'] == 'photo':
+            if item_attr['type'] == 'photo':
                 item_attr.update({
                     'photo_width': item['photo_src_big_width'],
                     'photo_height' : item['photo_src_big_height'],
                     'photo_src' : item['photo_src_big']
                 })
 
-            if item_attr['spot_type'] == 'checkin':
+            if item_attr['type'] == 'checkin':
                 item_attr.update({
-                    'spot_type' : 'spotting',
-                    'spot_message': item['checkin_message']
+                    'type' : 'spotting',
+                    'spot_message': simplejson.dumps(item['checkin_message'])
                 })
 
-            if item_attr['spot_type'] == 'status':
+            if item_attr['type'] == 'status':
                 item_attr.update({
-                    'spot_type' : 'spotting',
-                    'spot_message': item['status_message']
+                    'type' : 'spotting',
+                    'spot_message': simplejson.dumps(item['status_message'])
                 })
 
             
-        except:
+        except:            
             print sys.exc_info()
+            print item
             continue
 
         dItem = table.new_item(attrs=item_attr)
@@ -96,7 +97,7 @@ def updateCheckins(hugo_id, dbconn, data):
 def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
     page = 0
     num_results = 500
-    graph = facebook.GraphAPI(oauth_access_token)
+    graph = facebook.GraphAPI(oauth_access_token, timeout=60)
     
 
     #print simplejson.dumps(json, sort_keys = False, indent=2)
@@ -111,14 +112,14 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
     "query6" : "SELECT checkin_id, message from checkin where checkin_id in (SELECT id from #query1)",
     }
     
-    retries = 3
+    retries = 5
     
     while retries > 0:
         try:
             ret = graph.fql(query)
         except:
             print "Error querying FB %d" % (retries)
-            time.sleep(30)
+            time.sleep(10)
             retries = retries - 1
             if retries == 0:
                 return
