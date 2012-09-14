@@ -52,7 +52,10 @@ class PlacesHandler(BaseHandler):
             
             for item in result:
                 found = None
-                
+
+                if 'spot_categories' not in item or item['spot_categories'].find(category) == -1:
+                    continue
+                                    
                 for pItem in items:
                     spotMatch = levenshtein(item['spot_name'], pItem['spot_name'])/float(max(len(item['spot_name']), len(pItem['spot_name'])))
                     locationMatch = levenshtein(item['geohash_raw'], pItem['geohash_raw'])/13.0
