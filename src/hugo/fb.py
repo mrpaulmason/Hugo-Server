@@ -46,7 +46,7 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
         try:
             if origin != None:
                 gtarget = geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=5)
-                gh = geohash.encode(origin['location']['latitude'], origin['location']['longitude'], precision=5)
+                gh = geohash.encode(origin['latitude'], origin['longitude'], precision=5)
             
                 isLocal = False
             
@@ -105,7 +105,7 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
 
 
         except:            
-            print sys.exc_info()
+            print "updateNewsfeed", sys.exc_info()
             print item
             continue
 
@@ -174,7 +174,7 @@ def updateCheckins(hugo_id, dbconn, data):
 
             
         except:            
-            print sys.exc_info()
+            print "updateCheckins",sys.exc_info()
             print item
             continue
 
