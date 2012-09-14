@@ -81,7 +81,7 @@ class PlacesHandler(BaseHandler):
             items = sorted(items, key=operator.itemgetter('spot_checkins'))
             items.reverse()
             
-            if (len(items) < 1 or (category == "" and len(items) < 5)) and precision > 5:
+            if (len(items) < 1 or (category == "" and len(items) < 5)) and precision > 4:
                 precision = precision - 1
                 continue
             else:
@@ -139,7 +139,7 @@ class CategoriesHandler(BaseHandler):
         
             cats = [x for (x, a) in sorted_cats]
 
-            if len(cats) < 5 and precision > 5:
+            if len(cats) < 5 and precision > 4:
                 precision = precision - 1
                 continue
             else:
