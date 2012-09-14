@@ -52,18 +52,6 @@ class PlacesHandler(BaseHandler):
             
             for item in result:
                 found = None
-
-                if 'spot_categories' not in item or item['spot_categories'].find(category) == -1:
-                    continue
-
-                if 'geohash_raw' not in item:
-                    continue
-                
-                if 'spot_name' not in item:
-                    continue
-                
-                if 'person_pic_square' not in item:
-                    continue
                 
                 for pItem in items:
                     spotMatch = levenshtein(item['spot_name'], pItem['spot_name'])/float(max(len(item['spot_name']), len(pItem['spot_name'])))
@@ -81,10 +69,10 @@ class PlacesHandler(BaseHandler):
                         found['spot_checkins'] = item['spot_checkins']
                     
                     found['authors'].append(item['author_uid'])
-                    found['pics'].append(item['person_pic_square'])
+                    found['pics'].append(item['author_image'])
                 else:
                     item['authors'] = [item['author_uid']]
-                    item['pics'] = [item['person_pic_square']]
+                    item['pics'] = [item['author_image']]
                     items.append(item)        
             
             items = sorted(items, key=operator.itemgetter('spot_checkins'))
@@ -126,15 +114,6 @@ class CategoriesHandler(BaseHandler):
 
             for item in result:
                 
-                if 'geohash_raw' not in item:
-                    continue
-                
-                if 'spot_name' not in item:
-                    continue
-                
-                if 'person_pic_square' not in item:
-                    continue
-                    
                 try:
                     item_categories = simplejson.loads(item['spot_categories'])
                     for cat in item_categories:

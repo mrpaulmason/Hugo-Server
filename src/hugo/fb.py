@@ -16,7 +16,83 @@ from boto.dynamodb.condition import *
 
 
 oauth_access_token="BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEPQ5U4gcNYn3kZAp8kOBwyHBIvBue64eWsui5Eg7yzojWw2pvc9ZBR1vCmX"
+MAX_BATCH_REQUEST=25
 
+def put_items(dbconn, table, puts):
+    while(len(puts) > 0):
+      unprocessed_items = []
+      for i in xrange(0, len(puts), 25):
+        batch_list = dbconn.new_batch_write_list()
+        batch_list.add_batch(table, puts=puts[i:i+25])
+        result = batch_list.submit()
+        if table.name in result['UnprocessedItems']:
+          unprocessed_items.extend(result['UnprocessedItems'][table.name])
+
+      puts = []
+      for unprocessed_item in unprocessed_items:
+        attrs = unprocessed_item['PutRequest']['Item']
+        puts.append(table.new_item(attrs=attrs))
+
+def updateCheckins(hugo_id, dbconn, data):
+    table = dbconn.get_table("checkin_data")
+    
+    lst = dbconn.new_batch_write_list()
+    
+    items = []
+
+    for item in data:
+        
+        # Ignore the item if it has no coordinates
+        try:
+            item_attr = {
+                        'user_id': hugo_id,
+                        'geohash': geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13) + "_" + str(item['id']),
+                        'geohash_raw' : geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13),
+                        'spot_checkins' : item['spot_checkins'],
+                        'author_uid' : item['author_uid'],
+                        'author_name' : item['person_name'],
+                        'author_image' : item['person_pic_square'],
+                        'timestamp' : item['timestamp'],
+                        'tagged_uids' : simplejson.dumps(item['tagged_uids']),
+                        'spot_categories' : simplejson.dumps(item['spot_categories']),
+                        'spot_location' : simplejson.dumps(item['spot_location']),
+                        'spot_hours' : simplejson.dumps(item['spot_hours']),
+                        'spot_name' : simplejson.dumps(item['spot_name']),
+                        'spot_phone' : simplejson.dumps(item['spot_phone']),
+                        'spot_website' : simplejson.dumps(item['spot_website']),
+                        'spot_type' : simplejson.dumps(item['type'])
+            }
+            
+            if item_attr['spot_type'] == 'photo':
+                item_attr.update({
+                    'photo_width': item['photo_src_big_width'],
+                    'photo_height' : item['photo_src_big_height'],
+                    'photo_src' : item['photo_src_big']
+                })
+
+            if item_attr['spot_type'] == 'checkin':
+                item_attr.update({
+                    'spot_type' : 'spotting',
+                    'spot_message': item['checkin_message']
+                })
+
+            if item_attr['spot_type'] == 'status':
+                item_attr.update({
+                    'spot_type' : 'spotting',
+                    'spot_message': item['status_message']
+                })
+
+            
+        except:
+            print sys.exc_info()
+            continue
+
+        dItem = table.new_item(attrs=item_attr)
+        items.append(dItem)
+                                
+    put_items(dbconn, table, items)        
+    
+            
 def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
     page = 0
     num_results = 500
@@ -35,12 +111,20 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
     "query6" : "SELECT checkin_id, message from checkin where checkin_id in (SELECT id from #query1)",
     }
     
-    try:
-        ret = graph.fql(query)
-    except:
-        time.sleep(3)
-        ret = graph.fql(query)
+    retries = 3
     
+    while retries > 0:
+        try:
+            ret = graph.fql(query)
+        except:
+            print "Error querying FB %d" % (retries)
+            time.sleep(30)
+            retries = retries - 1
+            if retries == 0:
+                return
+            continue
+        break
+        
     query1 = ret[0]['fql_result_set']
     query2 = ret[1]['fql_result_set']
     query3 = ret[2]['fql_result_set']
@@ -75,37 +159,9 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
                                                         
     dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
                             aws_secret_access_key='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')
-    table = dbconn.get_table("checkin_data")
     
-    print simplejson.dumps(query1, indent=4)
-    print simplejson.dumps(query4, indent=4)
-
-    for item in query1:
-        item['user_id'] = hugo_id
-        
-        # Ignore the item if it has no coordinates
-        try:
-            item['geohash_raw'] = geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13)
-            item['geohash_checkin'] = geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13) + "_" + str(item['id'])
-        except:
-            continue
-
-        for (k,v) in item.items():
-           if isinstance(v,dict) or isinstance(v,list):
-              if len(v) == 0:
-                  item.pop(k)
-              else:
-                  item[k] = simplejson.dumps(v)        
-           elif v == "" or v == None:
-              item.pop(k)
-
-        try:
-            dItem = table.new_item(hash_key=hugo_id, range_key=item['geohash_checkin'], attrs=item) 
-            dItem.put()
-        except:
-            dItem = table.new_item(hash_key=hugo_id, range_key=item['geohash_checkin'], attrs=item) 
-            dItem.put()
-                    
+    updateCheckins(hugo_id, dbconn, query1)                
+    
     return None
 
 def processCheckins(hugo_id, oauth_access_token):
@@ -128,7 +184,7 @@ def processCheckins(hugo_id, oauth_access_token):
         tmp_ts = tmp_ts - delta         
         numMonths = numMonths -1    
 
-    jids = cloud.map(query_checkins, hugo_ids, oauth_tokens, times, deltas, _env="hugo", _profile=True)
+    jids = cloud.map(query_checkins, hugo_ids, oauth_tokens, times, deltas, _env="hugo", _profile=True, type='s1')
 
 
 # 7038 checkins with 31 days
@@ -136,6 +192,8 @@ def processCheckins(hugo_id, oauth_access_token):
 
 if __name__ == "__main__":    
     processCheckins(1, oauth_access_token)
+    processCheckins(2, "BAAGqkpC1J78BAEuprMC5ReD2uk8G4mvCzPtxjA7iRpi9nwLBgAkVH4fKOlbNyhs6QcZBLCtmbw5Hjlwy0jsDLkg2cSuDlnmbYIu4LdZAGuyyQAO17i")
+    processCheckins(3, "BAAGqkpC1J78BAIBMZBDKZC8AMWozRa45evrZCDdFLCw0ZCXGWLMRmvihEGZBYmmdyygTIbZBkRkMdGv6GzWU1ZBZBXsRCj6dEZBQVoLS72nXfc7jeq4mKxGxNIK53fOj9Jb0ZD")
     
 #    print simplejson.dumps(cloud.result(jids[0]), indent=4)
 #    query_checkins(1, "BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEPQ5U4gcNYn3kZAp8kOBwyHBIvBue64eWsui5Eg7yzojWw2pvc9ZBR1vCmX", int(time.time()), 3600*24*7)        
