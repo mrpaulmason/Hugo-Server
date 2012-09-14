@@ -137,7 +137,7 @@ class CategoriesHandler(BaseHandler):
         
             print sorted_cats
         
-            cats = [x for (x, a) in sorted_cats]
+            cats = [x for (x, a) in sorted_cats if a > 1]
 
             if len(cats) < 5 and precision > 4:
                 precision = precision - 1
