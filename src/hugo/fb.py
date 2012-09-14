@@ -274,7 +274,10 @@ def processCheckins(hugo_id, oauth_access_token, location_data=None):
         oauth_tokens.append(oauth_access_token)
         times.append(tmp_ts)
         deltas.append(delta)
-        origins.append(location_data['location'])
+        if location_data == None:
+            origins.append(None)
+        else:
+            origins.append(location_data['location'])
         tmp_ts = tmp_ts - delta         
         numMonths = numMonths -1    
 
