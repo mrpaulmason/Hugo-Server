@@ -33,6 +33,88 @@ def put_items(dbconn, table, puts):
         attrs = unprocessed_item['PutRequest']['Item']
         puts.append(table.new_item(attrs=attrs))
 
+def updateNewsfeed(hugo_id, dbconn, origin, data):
+    table = dbconn.get_table("newsfeed_data")
+
+    lst = dbconn.new_batch_write_list()
+
+    items = []
+
+    for item in data:
+
+        # Ignore the item if it has no coordinates
+        try:
+            if origin != None:
+                gtarget = geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=5)
+                gh = geohash.encode(origin['location']['latitude'], origin['location']['longitude'], precision=5)
+            
+                isLocal = False
+            
+                for neighbor in geohash.expand(gh):
+                    if neighbor == gtarget:
+                        isLocal = True
+            
+                if not isLocal:
+                    continue
+                        
+            item_attr = {
+                        'user_id': hugo_id,
+                        'geohash': geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13) + "_" + str(item['id']),
+                        'geohash_raw' : geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13),
+                        'spot_checkins' : item['spot_checkins'],
+                        'author_uid' : item['author_uid'],
+                        'author_name' : item['person_name'],
+                        'author_image' : item['person_pic_square'],
+                        'timestamp' : item['timestamp'],
+                        'type' : item['type'],
+                        'spot_name' : item['spot_name'],
+                        'tagged_uids' : simplejson.dumps(item['tagged_uids']),
+                        'spot_categories' : simplejson.dumps(item['spot_categories']),
+                        'spot_location' : simplejson.dumps(item['spot_location']),
+                        'spot_hours' : simplejson.dumps(item['spot_hours']),
+                        'spot_phone' : simplejson.dumps(item['spot_phone']),
+                        'spot_website' : simplejson.dumps(item['spot_website'])
+            }
+
+
+            if item_attr['type'] == 'checkin':
+                item_attr.update({
+                    'type' : 'spotting',
+                    'spot_message': simplejson.dumps(item['checkin_message'])
+                })
+
+            if item_attr['type'] == 'status':
+                item_attr.update({
+                    'type' : 'spotting',
+                    'spot_message': simplejson.dumps(item['status_message'])
+                })
+
+            # Convert bad photo checkins to regular checkins
+            try:
+                if item_attr['type'] == 'photo':
+                    item_attr.update({
+                        'photo_width': item['photo_src_big_width'],
+                        'photo_height' : item['photo_src_big_height'],
+                        'photo_src' : item['photo_src_big']
+                        })
+            except:
+                item_attr.update({
+                    'type' : 'spotting',
+                    'spot_message': simplejson.dumps("")
+                })
+
+
+        except:            
+            print sys.exc_info()
+            print item
+            continue
+
+        dItem = table.new_item(attrs=item_attr)
+        items.append(dItem)
+
+    put_items(dbconn, table, items)        
+
+
 def updateCheckins(hugo_id, dbconn, data):
     table = dbconn.get_table("checkin_data")
     
@@ -102,7 +184,7 @@ def updateCheckins(hugo_id, dbconn, data):
     put_items(dbconn, table, items)        
     
             
-def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
+def query_checkins(hugo_id, oauth_access_token, origin, timestamp, delta):
     page = 0
     num_results = 500
     graph = facebook.GraphAPI(oauth_access_token, timeout=60)
@@ -170,10 +252,11 @@ def query_checkins(hugo_id, oauth_access_token, timestamp, delta):
                             aws_secret_access_key='DFl2zvMPXV4qQ9XuGyM9I/s9nZVmkmOBp2jT7jF6')
     
     updateCheckins(hugo_id, dbconn, query1)                
+    updateNewsfeed(hugo_id, dbconn, origin, query1)                
     
     return None
 
-def processCheckins(hugo_id, oauth_access_token):
+def processCheckins(hugo_id, oauth_access_token, location_data=None):
     cloud.setkey( api_key="4667", api_secretkey="31a2945a0c955406be6d669f98e17ed9e9ee3ed7")
 
     tmp_ts = int(time.time())
@@ -182,6 +265,7 @@ def processCheckins(hugo_id, oauth_access_token):
 
     hugo_ids = []
     oauth_tokens = []
+    origins = []
     times = []
     deltas = []
     
@@ -190,22 +274,23 @@ def processCheckins(hugo_id, oauth_access_token):
         oauth_tokens.append(oauth_access_token)
         times.append(tmp_ts)
         deltas.append(delta)
+        origins.append(location_data['location'])
         tmp_ts = tmp_ts - delta         
         numMonths = numMonths -1    
 
-    jids = cloud.map(query_checkins, hugo_ids, oauth_tokens, times, deltas, _env="hugo", _profile=True, type='s1')
+    jids = cloud.map(query_checkins, hugo_ids, oauth_tokens, origins, times, deltas, _env="hugo", _profile=True, type='s1')
 
 
 # 7038 checkins with 31 days
 # 7355 checkins with 3 weeks
 
 if __name__ == "__main__":    
-    processCheckins(1, oauth_access_token)
-    processCheckins(2, "BAAGqkpC1J78BAEuprMC5ReD2uk8G4mvCzPtxjA7iRpi9nwLBgAkVH4fKOlbNyhs6QcZBLCtmbw5Hjlwy0jsDLkg2cSuDlnmbYIu4LdZAGuyyQAO17i")
-    processCheckins(3, "BAAGqkpC1J78BAIBMZBDKZC8AMWozRa45evrZCDdFLCw0ZCXGWLMRmvihEGZBYmmdyygTIbZBkRkMdGv6GzWU1ZBZBXsRCj6dEZBQVoLS72nXfc7jeq4mKxGxNIK53fOj9Jb0ZD")
+    processCheckins(1, oauth_access_token, {"location": {"latitude": 37.7793, "longitude": -122.4192}, "id": "114952118516947"})
+    processCheckins(2, "BAAGqkpC1J78BAEuprMC5ReD2uk8G4mvCzPtxjA7iRpi9nwLBgAkVH4fKOlbNyhs6QcZBLCtmbw5Hjlwy0jsDLkg2cSuDlnmbYIu4LdZAGuyyQAO17i", None)
+    processCheckins(3, "BAAGqkpC1J78BAIBMZBDKZC8AMWozRa45evrZCDdFLCw0ZCXGWLMRmvihEGZBYmmdyygTIbZBkRkMdGv6GzWU1ZBZBXsRCj6dEZBQVoLS72nXfc7jeq4mKxGxNIK53fOj9Jb0ZD", None)
     
 #    print simplejson.dumps(cloud.result(jids[0]), indent=4)
-#    query_checkins(1, "BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEPQ5U4gcNYn3kZAp8kOBwyHBIvBue64eWsui5Eg7yzojWw2pvc9ZBR1vCmX", int(time.time()), 3600*24*7)        
+#    query_checkins(1, "BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEPQ5U4gcNYn3kZAp8kOBwyHBIvBue64eWsui5Eg7yzojWw2pvc9ZBR1vCmX",{"location": {"latitude": 37.7793, "longitude": -122.4192}, "id": "114952118516947"}, int(time.time()), 3600*24*7)        
 #    for ret in cloud.iresult(jids):
 #        print len(ret)
 #        results.extend(ret)

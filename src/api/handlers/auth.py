@@ -22,9 +22,22 @@ class AuthHandler(BaseHandler):
         fb_auth_key = self.get_argument("fb_auth_key", "")
         fb_expires = self.get_argument("fb_expires", "")
 
+        graph = facebook.GraphAPI(fb_auth_key, timeout=5)
         # Connect to Facebook API and update MySQLdb
-        graph = facebook.GraphAPI(fb_auth_key)
-        json = graph.get_object("me", fields="id,name,first_name,last_name,picture,friends,location")
+        retries = 5
+
+        while retries > 0:
+            try:
+                json = graph.get_object("me", fields="id,name,first_name,last_name,picture,friends,location")
+            except:
+                print "Error querying FB %d" % (retries)
+                retries = retries - 1
+                if retries == 0:
+                    self.send_error()
+                    return
+                else:
+                    continue
+            break
         
         if 'location' in json:
             location_data = graph.get_object(json['location']['id'], fields="location")       
@@ -58,7 +71,7 @@ class AuthHandler(BaseHandler):
             raise tornado.web.HTTPError(403)
             
         if added_user:
-            hugo.fb.processCheckins(user_id, fb_auth_key)
+            hugo.fb.processCheckins(user_id, fb_auth_key, location_data)
         
         # Send confirmation of success
         self.content_type = 'application/json'
