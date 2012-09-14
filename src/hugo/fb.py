@@ -38,6 +38,8 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
 
     lst = dbconn.new_batch_write_list()
 
+    timestampList = {}
+
     items = []
 
     for item in data:
@@ -56,7 +58,11 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
             
                 if not isLocal:
                     continue
-                        
+            
+            # Remove duplicates, helps w/ batch photo uploads.
+            if item['timestamp'] in timestampList:
+                continue
+            
             item_attr = {
                         'user_id': hugo_id,
                         'geohash': geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13) + "_" + str(item['id']),
@@ -109,6 +115,7 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
             print item
             continue
 
+        timestampList[item_attr['timestamp']] = True
         dItem = table.new_item(attrs=item_attr)
         items.append(dItem)
 
@@ -134,6 +141,7 @@ def updateCheckins(hugo_id, dbconn, data):
                         'author_uid' : item['author_uid'],
                         'author_name' : item['person_name'],
                         'author_image' : item['person_pic_square'],
+                        'fb_place_id' : item['spot_page_id'],
                         'timestamp' : item['timestamp'],
                         'type' : item['type'],
                         'spot_name' : item['spot_name'],
