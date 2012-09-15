@@ -273,7 +273,7 @@ def query_checkins(hugo_id, oauth_access_token, origin, timestamp, delta):
 def processCheckins(hugo_id, oauth_access_token, location_data=None):
     cloud.setkey( api_key="4667", api_secretkey="31a2945a0c955406be6d669f98e17ed9e9ee3ed7")
 
-    tmp_ts = int(time.time())
+    tmp_ts = int(time.gmtime())
     delta = 3600*24*21
     numMonths = 34
 
