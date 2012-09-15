@@ -61,7 +61,7 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
             
             # Remove duplicates, helps w/ batch photo uploads.
             if item['timestamp'] in timestampList:
-                print "Duplicate: ", item
+                print "Duplicate: ", item, item['timestamp']
                 continue
             
             item_attr = {
@@ -118,7 +118,7 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
             print item
             continue
 
-        timestampList[item_attr['timestamp']] = True
+        timestampList[item_attr['timestamp']] = item_attr
         dItem = table.new_item(attrs=item_attr)
         items.append(dItem)
 
@@ -313,98 +313,8 @@ if __name__ == "__main__":
     processCheckins(2, "BAAGqkpC1J78BAEuprMC5ReD2uk8G4mvCzPtxjA7iRpi9nwLBgAkVH4fKOlbNyhs6QcZBLCtmbw5Hjlwy0jsDLkg2cSuDlnmbYIu4LdZAGuyyQAO17i", None)
     processCheckins(3, "BAAGqkpC1J78BAIBMZBDKZC8AMWozRa45evrZCDdFLCw0ZCXGWLMRmvihEGZBYmmdyygTIbZBkRkMdGv6GzWU1ZBZBXsRCj6dEZBQVoLS72nXfc7jeq4mKxGxNIK53fOj9Jb0ZD", None)
     
-#    print simplejson.dumps(cloud.result(jids[0]), indent=4)
 #    query_checkins(1, "BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEPQ5U4gcNYn3kZAp8kOBwyHBIvBue64eWsui5Eg7yzojWw2pvc9ZBR1vCmX",{"location": {"latitude": 37.7793, "longitude": -122.4192}, "id": "114952118516947"}, int(time.time()), 3600*24*7)        
-#    for ret in cloud.iresult(jids):
-#        print len(ret)
-#        results.extend(ret)
-        
-#    print results[0]
-#    print len(results), (time.time()-ts)
-#    print simplejson.dumps(results, sort_keys = False, indent = 4)
-    
 
-"""
-import boto.dynamodb
-import time, simplejson
-
-from boto.dynamodb.condition import *
-
-b = time.time()
-
-dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
-                           aws_secret_access_key='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')
-table = dbconn.get_table("checkin_data")
-
-result = table.query(
-  hash_key = 1) 
-#  range_key_condition = BETWEEN("9q8yy", "9q8yy{"))
-
-items = []  
-  
-for item in result:
-    item.delete()
-
-
-f = time.time()
-print simplejson.dumps(items, indent=4)
-print len(item), f-b
-
-
-
-graph = facebook.GraphAPI(oauth_access_token)
-
-total = 0
-friends = graph.fql("SELECT uid2 FROM friend WHERE uid1=me()")
-
-friends.append({'uid2':"me()"})
-user_count = 0
-
-while True:
-#for friend in friends:
-#    uid = friend['uid2']
-    user_total = 0
-    user_count = user_count + 1
-
-    page = 0
-    ts = int(time.time())
-    nts = None
-    while True:
-        # Throws: urllib2.HTTPError: HTTP Error 500: Internal Server Error
-        try:
-#            query = "SELECT checkin_id, author_uid, app_id, timestamp, page_id, post_id, message, tagged_uids, coords FROM checkin WHERE author_uid=%s and timestamp < %d limit %d,500" % (str(uid),ts, 500*page)
-            query = "SELECT id, author_uid, app_id, timestamp, page_id, page_type, coords, type FROM location_post WHERE (author_uid IN (SELECT uid2 FROM friend WHERE uid1=me()) or author_uid=me()) and timestamp < %d and type != \"photo\" limit %d,500" % (ts, 500*page)
-            print "%s : results so far %d" % (query, total)
-            ret = graph.fql(query)
-        except Exception as detail:
-            print query
-            print "Unexpected error:", detail
-            time.sleep(2)   
-            break
-        page = page + 1
-        
-        for item in ret:
-            if nts == None:
-                nts = item['timestamp']
-            else:
-                nts = min(nts,item['timestamp'])
-#            print "%s : %s %s : %s" % (time.ctime(item['timestamp']), item['tagged_uids'], item['coords'], item['message'])
-        
-        total = total + len(ret)
-        user_total = user_total + len(ret)
-
-        if len(ret) == 0:
-            break
-        elif len(ret) < 500:
-            ts = nts
-            page = 0
-            continue
-    break
-#    print "%s has %s checkins, running total %d (%d users left)" % (uid, user_total, total, len(friends)-user_count)            
-
-
-print "Total items: %s minimum timestamp is %s" % (total, ts)       
-"""        
 
         
         
