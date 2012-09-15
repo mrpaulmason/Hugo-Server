@@ -61,6 +61,7 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
             
             # Remove duplicates, helps w/ batch photo uploads.
             if item['timestamp'] in timestampList:
+                print "Duplicate: ", item
                 continue
             
             item_attr = {
@@ -73,6 +74,8 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
                         'author_image' : item['person_pic_square'],
                         'timestamp' : item['timestamp'],
                         'type' : item['type'],
+                        'id' : item['id'],
+                        'source' : 'facebook',
                         'spot_name' : item['spot_name'],
                         'tagged_uids' : simplejson.dumps(item['tagged_uids']),
                         'spot_categories' : simplejson.dumps(item['spot_categories']),
@@ -144,6 +147,8 @@ def updateCheckins(hugo_id, dbconn, data):
                         'fb_place_id' : item['spot_page_id'],
                         'timestamp' : item['timestamp'],
                         'type' : item['type'],
+                        'id' : item['id'],
+                        'source' : 'facebook',
                         'spot_name' : item['spot_name'],
                         'tagged_uids' : simplejson.dumps(item['tagged_uids']),
                         'spot_categories' : simplejson.dumps(item['spot_categories']),
@@ -304,10 +309,9 @@ def processCheckins(hugo_id, oauth_access_token, location_data=None):
 # 7355 checkins with 3 weeks
 
 if __name__ == "__main__":    
-    processCheckins(1, oauth_access_token, None)
-#    processCheckins(1, oauth_access_token, {"location": {"latitude": 37.7793, "longitude": -122.4192}, "id": "114952118516947"})
-#    processCheckins(2, "BAAGqkpC1J78BAEuprMC5ReD2uk8G4mvCzPtxjA7iRpi9nwLBgAkVH4fKOlbNyhs6QcZBLCtmbw5Hjlwy0jsDLkg2cSuDlnmbYIu4LdZAGuyyQAO17i", None)
-#    processCheckins(3, "BAAGqkpC1J78BAIBMZBDKZC8AMWozRa45evrZCDdFLCw0ZCXGWLMRmvihEGZBYmmdyygTIbZBkRkMdGv6GzWU1ZBZBXsRCj6dEZBQVoLS72nXfc7jeq4mKxGxNIK53fOj9Jb0ZD", None)
+    processCheckins(1, oauth_access_token, {"location": {"latitude": 37.7793, "longitude": -122.4192}, "id": "114952118516947"})
+    processCheckins(2, "BAAGqkpC1J78BAEuprMC5ReD2uk8G4mvCzPtxjA7iRpi9nwLBgAkVH4fKOlbNyhs6QcZBLCtmbw5Hjlwy0jsDLkg2cSuDlnmbYIu4LdZAGuyyQAO17i", None)
+    processCheckins(3, "BAAGqkpC1J78BAIBMZBDKZC8AMWozRa45evrZCDdFLCw0ZCXGWLMRmvihEGZBYmmdyygTIbZBkRkMdGv6GzWU1ZBZBXsRCj6dEZBQVoLS72nXfc7jeq4mKxGxNIK53fOj9Jb0ZD", None)
     
 #    print simplejson.dumps(cloud.result(jids[0]), indent=4)
 #    query_checkins(1, "BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEPQ5U4gcNYn3kZAp8kOBwyHBIvBue64eWsui5Eg7yzojWw2pvc9ZBR1vCmX",{"location": {"latitude": 37.7793, "longitude": -122.4192}, "id": "114952118516947"}, int(time.time()), 3600*24*7)        
