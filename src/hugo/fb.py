@@ -47,8 +47,8 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
         # Ignore the item if it has no coordinates
         try:
             if origin != None:
-                gtarget = geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=5)
-                gh = geohash.encode(origin['latitude'], origin['longitude'], precision=5)
+                gtarget = geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=4)
+                gh = geohash.encode(origin['latitude'], origin['longitude'], precision=4)
             
                 isLocal = False
             
