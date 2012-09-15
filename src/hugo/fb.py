@@ -82,19 +82,6 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
                         'spot_website' : simplejson.dumps(item['spot_website'])
             }
 
-
-            if item_attr['type'] == 'checkin':
-                item_attr.update({
-                    'type' : 'spotting',
-                    'spot_message': simplejson.dumps(item['checkin_message'])
-                })
-
-            if item_attr['type'] == 'status':
-                item_attr.update({
-                    'type' : 'spotting',
-                    'spot_message': simplejson.dumps(item['status_message'])
-                })
-
             # Convert bad photo checkins to regular checkins
             try:
                 if item_attr['type'] == 'photo':
@@ -103,6 +90,19 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
                         'photo_height' : item['photo_src_big_height'],
                         'photo_src' : item['photo_src_big']
                         })
+
+                if item_attr['type'] == 'checkin':
+                    item_attr.update({
+                        'type' : 'spotting',
+                        'spot_message': simplejson.dumps(item['checkin_message'])
+                    })
+
+                if item_attr['type'] == 'status':
+                    item_attr.update({
+                        'type' : 'spotting',
+                        'spot_message': simplejson.dumps(item['status_message'])
+                    })
+
             except:
                 item_attr.update({
                     'type' : 'spotting',
@@ -154,17 +154,6 @@ def updateCheckins(hugo_id, dbconn, data):
             }
             
 
-            if item_attr['type'] == 'checkin':
-                item_attr.update({
-                    'type' : 'spotting',
-                    'spot_message': simplejson.dumps(item['checkin_message'])
-                })
-
-            if item_attr['type'] == 'status':
-                item_attr.update({
-                    'type' : 'spotting',
-                    'spot_message': simplejson.dumps(item['status_message'])
-                })
 
             # Convert bad photo checkins to regular checkins
             try:
@@ -174,6 +163,18 @@ def updateCheckins(hugo_id, dbconn, data):
                         'photo_height' : item['photo_src_big_height'],
                         'photo_src' : item['photo_src_big']
                         })
+                if item_attr['type'] == 'checkin':
+                    item_attr.update({
+                        'type' : 'spotting',
+                        'spot_message': simplejson.dumps(item['checkin_message'])
+                    })
+
+                if item_attr['type'] == 'status':
+                    item_attr.update({
+                        'type' : 'spotting',
+                        'spot_message': simplejson.dumps(item['status_message'])
+                    })
+
             except:
                 item_attr.update({
                     'type' : 'spotting',
@@ -289,8 +290,15 @@ def processCheckins(hugo_id, oauth_access_token, location_data=None):
         tmp_ts = tmp_ts - delta         
         numMonths = numMonths -1    
 
-    jids = cloud.map(query_checkins, hugo_ids, oauth_tokens, origins, times, deltas, _env="hugo", _profile=True, type='s1')
-
+    retries = 3
+    while retries > 0:
+        try:
+            jids = cloud.map(query_checkins, hugo_ids, oauth_tokens, origins, times, deltas, _env="hugo", _profile=True, type='s1')
+            retries = 0
+        except:
+            time.sleep(5)
+            retries = retries - 1
+            continue
 
 # 7038 checkins with 31 days
 # 7355 checkins with 3 weeks
