@@ -39,6 +39,7 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
     lst = dbconn.new_batch_write_list()
 
     timestampList = {}
+    authorList = {}
 
     items = []
 
@@ -46,6 +47,7 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
 
         # Ignore the item if it has no coordinates
         try:
+            #temporary all None
             if origin != None:
                 gtarget = geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=4)
                 gh = geohash.encode(origin['latitude'], origin['longitude'], precision=4)
@@ -62,6 +64,10 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
             # Remove duplicates, helps w/ batch photo uploads.
             if item['timestamp'] in timestampList:
                 print "Duplicate: ", item, item['timestamp']
+                continue
+
+            if (item['author_uid'],item['spot_name']) in authorList:
+                print "ADuplicate: ", item, item['timestamp']
                 continue
             
             item_attr = {
@@ -119,6 +125,8 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
             continue
 
         timestampList[item_attr['timestamp']] = item_attr
+        authorList[(item['author_uid'],item['spot_name'])] = item_attr
+
         dItem = table.new_item(attrs=item_attr)
         items.append(dItem)
 
