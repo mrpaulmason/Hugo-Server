@@ -19,7 +19,6 @@ oauth_access_token="BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEP
 MAX_BATCH_REQUEST=25
 
 def put_items(dbconn, table, puts):
-    return
     while(len(puts) > 0):
       unprocessed_items = []
       for i in xrange(0, len(puts), 25):
@@ -266,10 +265,6 @@ def query_checkins(hugo_id, oauth_access_token, origin, timestamp, delta):
             if query6[j]['checkin_id'] == query1[i]['id']:
                 for key in query6[j]:
                     query1[i]['checkin_'+key] = query6[j][key]
-
-
-    print simplejson.dumps(query1, indent=4)
-    return None
 
                                                         
     dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
