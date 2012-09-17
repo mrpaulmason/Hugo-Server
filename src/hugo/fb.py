@@ -47,7 +47,6 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
 
         # Ignore the item if it has no coordinates
         try:
-            #temporary all None
             if origin != None:
                 gtarget = geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=4)
                 gh = geohash.encode(origin['latitude'], origin['longitude'], precision=4)
@@ -282,8 +281,9 @@ def processCheckins(hugo_id, oauth_access_token, location_data=None):
     cloud.setkey( api_key="4667", api_secretkey="31a2945a0c955406be6d669f98e17ed9e9ee3ed7")
 
     tmp_ts = int(time.mktime(time.gmtime()))
-    delta = 3600*24*21
-    numMonths = 34
+    # 2 years
+    delta = 3600*24*7
+    numPeriods = 104
 
     hugo_ids = []
     oauth_tokens = []
@@ -291,7 +291,7 @@ def processCheckins(hugo_id, oauth_access_token, location_data=None):
     times = []
     deltas = []
     
-    while numMonths > 0:        
+    while numPeriods > 0:        
         hugo_ids.append(hugo_id)
         oauth_tokens.append(oauth_access_token)
         times.append(tmp_ts)
@@ -301,7 +301,7 @@ def processCheckins(hugo_id, oauth_access_token, location_data=None):
         else:
             origins.append(location_data['location'])
         tmp_ts = tmp_ts - delta         
-        numMonths = numMonths -1    
+        numPeriods = numPeriods -1    
 
     retries = 3
     while retries > 0:
