@@ -19,6 +19,7 @@ oauth_access_token="BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEP
 MAX_BATCH_REQUEST=25
 
 def put_items(dbconn, table, puts):
+    return
     while(len(puts) > 0):
       unprocessed_items = []
       for i in xrange(0, len(puts), 25):
@@ -215,7 +216,7 @@ def query_checkins(hugo_id, oauth_access_token, origin, timestamp, delta):
     #select latitude, longitude, name from place where page_id='114952118516947' to get current location latitude, longitude
     
     query = {
-    "query1" : "SELECT id, author_uid, app_id, timestamp, page_id, page_type, coords, type, tagged_uids  FROM location_post WHERE (author_uid IN (SELECT uid2 from friend where uid1=me()) or author_uid=me()) and timestamp < "+str(timestamp)+" and timestamp > "+str(timestamp-delta)+" limit "+str(page*num_results)+","+str(num_results),
+    "query1" : "SELECT id, author_uid, app_id, timestamp, page_id, page_type, coords, type, tagged_uids  FROM location_post WHERE (author_uid=me() OR (author_uid IN (SELECT uid2 from friend where uid1=me()))) and timestamp < "+str(timestamp)+" and timestamp > "+str(timestamp-delta)+" limit "+str(page*num_results)+","+str(num_results),
     "query2" : "SELECT page_id, categories, name, website, location, checkins, phone, hours, price_range, pic, parking, fan_count from page where page_id in (SELECT page_id from #query1)",
     "query3" : "SELECT uid, name, pic_square, sex, relationship_status, significant_other_id, activities, interests, is_app_user, friend_count, mutual_friend_count, current_location, hometown_location, devices from user where uid in (SELECT author_uid from #query1)",
     "query4" : "SELECT object_id, src_big, src_big_width, src_big_height from photo where object_id in (SELECT id from #query1)",
@@ -267,6 +268,8 @@ def query_checkins(hugo_id, oauth_access_token, origin, timestamp, delta):
                     query1[i]['checkin_'+key] = query6[j][key]
 
 
+    print simplejson.dumps(query1, indent=4)
+    return None
 
                                                         
     dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
