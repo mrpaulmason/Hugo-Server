@@ -24,7 +24,14 @@ def put_items(dbconn, table, puts):
       for i in xrange(0, len(puts), 25):
         batch_list = dbconn.new_batch_write_list()
         batch_list.add_batch(table, puts=puts[i:i+25])
-        result = batch_list.submit()
+
+        # To Handle Bad Requests from DynamoDB, watch for infinite loops
+        try:
+            result = batch_list.submit()
+        except:
+            put_items(dbconn, table, puts[i:i+25])
+            continue
+
         if table.name in result['UnprocessedItems']:
           unprocessed_items.extend(result['UnprocessedItems'][table.name])
 
