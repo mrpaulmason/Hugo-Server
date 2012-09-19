@@ -77,10 +77,11 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
                 continue
             
             item_attr = {
-                        'hugo_bundle_id': "newsfeed_%d" % (hugo_id),
+                        'bundle_id': "newsfeed_%d" % (hugo_id),
                         'geohash': geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13) + "_" + str(item['id']),
                         'geohash_raw' : geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13),
                         'spot_checkins' : item['spot_checkins'],
+                        'me_uid' : item['me_uid'],
                         'author_uid' : item['author_uid'],
                         'author_name' : item['person_name'],
                         'author_image' : item['person_pic_square'],
@@ -136,9 +137,10 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
         dItem = table.new_item(attrs=item_attr)
         items.append(dItem)
         
-        item_attr['hugo_bundle_id'] = "user_%d" % (hugo_id)
-        dItem = table.new_item(attrs=item_attr)
-        items.append(dItem)        
+        if item_attr['me_uid'] == item_attr['author_uid']:
+            item_attr['bundle_id'] = "user_%d" % (hugo_id)
+            dItem = table.new_item(attrs=item_attr)
+            items.append(dItem)        
 
     put_items(dbconn, table, items)        
 
@@ -231,7 +233,7 @@ def query_checkins(hugo_id, oauth_access_token, origin, timestamp, delta):
     "query3" : "SELECT uid, name, pic_square, sex, relationship_status, significant_other_id, activities, interests, is_app_user, friend_count, mutual_friend_count, current_location, hometown_location, devices from user where uid in (SELECT author_uid from #query1)",
     "query4" : "SELECT object_id, src_big, src_big_width, src_big_height from photo where object_id in (SELECT id from #query1)",
     "query5" : "SELECT status_id, message from status where status_id in (SELECT id from #query1)",
-    "query6" : "SELECT checkin_id, message from checkin where checkin_id in (SELECT id from #query1)",
+    "query6" : "SELECT checkin_id, message from checkin where checkin_id in (SELECT id from #query1)"
     }
     
     retries = 5
@@ -239,8 +241,10 @@ def query_checkins(hugo_id, oauth_access_token, origin, timestamp, delta):
     while retries > 0:
         try:
             ret = graph.fql(query)
+            me_uid = graph.get_object('me', fields="id")['id']
         except:
             print "Error querying FB %d" % (retries)
+            print sys.exc_info()
             time.sleep(10)
             retries = retries - 1
             if retries == 0:
@@ -254,8 +258,9 @@ def query_checkins(hugo_id, oauth_access_token, origin, timestamp, delta):
     query4 = ret[3]['fql_result_set']
     query5 = ret[4]['fql_result_set']
     query6 = ret[5]['fql_result_set']
-        
+    
     for i in range(0,len(query1)):
+        query1[i]['me_uid'] = me_uid
         for j in range(0,len(query2)):
             if query2[j]['page_id'] == query1[i]['page_id']:
                 for key in query2[j]:
@@ -330,7 +335,7 @@ if __name__ == "__main__":
     processCheckins(2, "BAAGqkpC1J78BAEuprMC5ReD2uk8G4mvCzPtxjA7iRpi9nwLBgAkVH4fKOlbNyhs6QcZBLCtmbw5Hjlwy0jsDLkg2cSuDlnmbYIu4LdZAGuyyQAO17i", None)
     processCheckins(3, "BAAGqkpC1J78BAIBMZBDKZC8AMWozRa45evrZCDdFLCw0ZCXGWLMRmvihEGZBYmmdyygTIbZBkRkMdGv6GzWU1ZBZBXsRCj6dEZBQVoLS72nXfc7jeq4mKxGxNIK53fOj9Jb0ZD", None)
     
-#    query_checkins(1, "BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEPQ5U4gcNYn3kZAp8kOBwyHBIvBue64eWsui5Eg7yzojWw2pvc9ZBR1vCmX",{"location": {"latitude": 37.7793, "longitude": -122.4192}, "id": "114952118516947"}, int(time.time()), 3600*24*7)        
+#    query_checkins(1, "BAAGqkpC1J78BAF3RnWBOr30iU7yRT7s1byWZCE8VYfwuYSZB5IL0rcFzlEPQ5U4gcNYn3kZAp8kOBwyHBIvBue64eWsui5Eg7yzojWw2pvc9ZBR1vCmX",{"latitude": 37.7793, "longitude": -122.4192}, int(time.time()), 3600*24*7)        
 
 
         
