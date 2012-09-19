@@ -260,7 +260,7 @@ def query_checkins(hugo_id, oauth_access_token, origin, timestamp, delta):
     query6 = ret[5]['fql_result_set']
     
     for i in range(0,len(query1)):
-        query1[i]['me_uid'] = me_uid
+        query1[i]['me_uid'] = int(me_uid)
         for j in range(0,len(query2)):
             if query2[j]['page_id'] == query1[i]['page_id']:
                 for key in query2[j]:
