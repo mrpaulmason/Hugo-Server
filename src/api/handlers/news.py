@@ -16,6 +16,7 @@ class NewsHandler(BaseHandler):
     # TODO: Need key signatuare to prevent data theft
     def post(self):
         hugo_id = self.get_argument("hugo_id", "1")
+        prefix = self.get_argument("prefix", "newsfeed")
         signature = self.get_argument("signature","")
                         
         dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
@@ -23,7 +24,7 @@ class NewsHandler(BaseHandler):
         table = dbconn.get_table("newsfeed_data")
 
         result = table.query(
-            hash_key = int(hugo_id), 
+            hash_key = "%s_%d" % (prefix, hugo_id), 
             max_results = 25, 
             scan_index_forward = False)
 

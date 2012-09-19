@@ -77,7 +77,7 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
                 continue
             
             item_attr = {
-                        'user_id': hugo_id,
+                        'hugo_bundle_id': "newsfeed_%d" % (hugo_id),
                         'geohash': geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13) + "_" + str(item['id']),
                         'geohash_raw' : geohash.encode(item['coords']['latitude'], item['coords']['longitude'], precision=13),
                         'spot_checkins' : item['spot_checkins'],
@@ -135,6 +135,10 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
 
         dItem = table.new_item(attrs=item_attr)
         items.append(dItem)
+        
+        item_attr['hugo_bundle_id'] = "user_%d" % (hugo_id)
+        dItem = table.new_item(attrs=item_attr)
+        items.append(dItem)        
 
     put_items(dbconn, table, items)        
 
