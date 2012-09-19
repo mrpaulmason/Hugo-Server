@@ -24,7 +24,7 @@ class NewsHandler(BaseHandler):
         table = dbconn.get_table("newsfeed_data")
 
         result = table.query(
-            hash_key = "%s_%d" % (prefix, hugo_id), 
+            hash_key = "%s_%d" % (prefix, int(hugo_id)), 
             max_results = 25, 
             scan_index_forward = False)
 
