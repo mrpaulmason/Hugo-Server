@@ -36,7 +36,7 @@ class CommentsHandler(BaseHandler):
         for item in result:
             items.append(item)        
 
-        json_response['items']
+        json_response['results'] = items 
                         
         self.set_header("Content-Type", "application/json; charset=UTF-8")
         self.write(simplejson.dumps(json_response,sort_keys=True, indent=4))
