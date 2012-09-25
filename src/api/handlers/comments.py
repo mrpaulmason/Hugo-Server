@@ -28,13 +28,18 @@ class CommentsHandler(BaseHandler):
         result = table.query(
             hash_key = "spotting_%s" % fb_post_id) 
 
+        json_response = {}
+        json_response['post_id'] = fb_post_id
+
         items = []  
             
         for item in result:
             items.append(item)        
+
+        json_response['items']
                         
         self.set_header("Content-Type", "application/json; charset=UTF-8")
-        self.write(simplejson.dumps(items,sort_keys=True, indent=4))
+        self.write(simplejson.dumps(json_response,sort_keys=True, indent=4))
     
     # TODO: Vulnerable for injection
     def post(self):
