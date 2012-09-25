@@ -79,6 +79,7 @@ class CommentsHandler(BaseHandler):
                 
         item_attr = {
                         'bundle_id': "spotting_%s" % (fb_post_id),
+                        'bundle_timestamp' : "%d_%d" % (user_id,int(time.mktime(time.gmtime()))),
                         'timestamp' : int(time.mktime(time.gmtime())),
                         'comment_type' : comment_type,
                         'comment_message' : comment_message

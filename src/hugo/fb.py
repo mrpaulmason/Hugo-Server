@@ -85,6 +85,7 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
                         'author_uid' : item['author_uid'],
                         'author_name' : item['person_name'],
                         'author_image' : item['person_pic_square'],
+                        'bundle_timestamp' : "%s" % (item['timestamp']),
                         'timestamp' : item['timestamp'],
                         'type' : item['type'],
                         'id' : item['id'],
