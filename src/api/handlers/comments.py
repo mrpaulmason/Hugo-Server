@@ -16,7 +16,25 @@ logger = logging.getLogger()
 
 class CommentsHandler(BaseHandler):
     def get(self):
-        self.write("Error, no parameters were passed")
+        fb_post_id = self.get_argument("fb_post_id","")
+        if fb_post_id == "":
+            raise tornado.web.HTTPError(403)
+        
+        print fb_post_id
+        
+        dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
+                                   aws_secret_access_key='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')
+        table = dbconn.get_table("newsfeed_data")
+        result = table.query(
+            hash_key = "spotting_%s" % fb_post_id) 
+
+        items = []  
+            
+        for item in result:
+            items.append(item)        
+                        
+        self.set_header("Content-Type", "application/json; charset=UTF-8")
+        self.write(simplejson.dumps(items,sort_keys=True, indent=4))
     
     # TODO: Vulnerable for injection
     def post(self):
@@ -25,17 +43,11 @@ class CommentsHandler(BaseHandler):
         fb_post_id = self.get_argument("fb_post_id","")
         comment_message = self.get_argument("comment_message", "")
         comment_type = self.get_argument("comment_type","")
-        
-        print comment_type
-        print fb_auth_key
-        print fb_expires
-        
-        if comment_type == "" or fb_auth_key == "" or fb_expires == "":
+                
+        # Move this to BaseAuthHandler
+        if comment_type == "" or fb_auth_key == "" or fb_expires == "" or (comment_type == "chat" and comment_message == ""):
             raise tornado.web.HTTPError(403)
-        
-        if comment_type == "chat" and comment_message == "":
-            raise tornado.web.HTTPError(403)
-        
+                
         graph = facebook.GraphAPI(fb_auth_key, timeout=5)
 
         try:
