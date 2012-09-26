@@ -37,6 +37,8 @@ class NewsHandler(BaseHandler):
             try:
                 commentItem = commentTable.get_item("spotting_%d" % item['id'])
                 item['comments'] = simplejson.loads(commentItem['comments'])
+                if 'spot_message' in item:
+                    item['spot_message'] = simplejson.loads(item['spot_message'])
             except:
                 pass
  #           itemList.append("spotting_%d" % item['id'])
