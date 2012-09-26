@@ -110,6 +110,7 @@ class CommentsHandler(BaseHandler):
                         'timestamp' : int(time.mktime(time.gmtime())),
                         'comment_message' : comment_message,
                         'comment_type' : comment_type,
+                        'name' : json['name']
                         }
 
             comments.append(item_attr)
