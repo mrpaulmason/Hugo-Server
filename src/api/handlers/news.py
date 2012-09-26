@@ -31,15 +31,19 @@ class NewsHandler(BaseHandler):
         items = []  
             
         for item in result:
-            commentResults = table.query(
+            items.append(item)        
+            
+        for item in items:
+            commentResults = dbconn.query(table,
                 hash_key = "spotting_%s" % item['id'])
             
             comments = []  
-            for comment in result:
+            for comment in commentResults:
+                print comment
                 comments.append(comment)        
                 
             item['comments'] = comments 
-            items.append(item)        
+
                         
         self.set_header("Content-Type", "application/json; charset=UTF-8")
         self.write(simplejson.dumps(items,sort_keys=True, indent=4))
