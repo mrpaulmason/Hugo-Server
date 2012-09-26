@@ -115,7 +115,7 @@ class CommentsHandler(BaseHandler):
                     
             # Send confirmation of success
             self.content_type = 'application/json'
-            details = {'status':'success', 'user_id':user_id}
+            details = {'status':'success', 'user_id':user_id, 'item_data': item_attr}
             self.write(details)
         else:
             raise tornado.web.HTTPError(404)
