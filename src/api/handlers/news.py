@@ -30,17 +30,22 @@ class NewsHandler(BaseHandler):
             scan_index_forward = False)
 
         items = []  
-        itemList = []
-        dynamoBatch = dbconn.new_batch_list()
+#        itemList = []
+#        dynamoBatch = dbconn.new_batch_list()
             
         for item in result:
-            itemList.append(str(item['id']))
+            try:
+                commentItem = commentTable.get_item("spotting_%d" % item['id'])
+                item['comments'] = simplejson.loads(commentItem['comments'])
+            except:
+                pass
+ #           itemList.append("spotting_%d" % item['id'])
             items.append(item)        
             
-        dynamoBatch.add_batch(commentTable, itemList)
+#        dynamoBatch.add_batch(commentTable, itemList)
         
-        data = dynamoBatch.submit()
-        print data
+#        data = dynamoBatch.submit()
+#        print data
                         
         self.set_header("Content-Type", "application/json; charset=UTF-8")
         self.write(simplejson.dumps(items,sort_keys=True, indent=4))
