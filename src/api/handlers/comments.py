@@ -77,7 +77,7 @@ class CommentsHandler(BaseHandler):
             except:
                 raise tornado.web.HTTPError(404)
             
-            comments = simplejson.load(item['comments'])
+            comments = simplejson.loads(item['comments'])
             
             filteredComments = [x for x in comments if not (x['comment_type'] == "like" and x['user_id'] == user_id) ]
             
@@ -120,7 +120,7 @@ class CommentsHandler(BaseHandler):
                 raise tornado.web.HTTPError(500)
                     
             # Send confirmation of success
-            details = {'status':'success', 'user_id':user_id, 'item_data': item_attr}
+            details = {'status':'success', 'user_id':user_id}
             details['results'] = comments 
             
             self.content_type = 'application/json'
