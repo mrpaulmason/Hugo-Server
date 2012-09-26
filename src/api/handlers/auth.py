@@ -51,6 +51,7 @@ class AuthHandler(BaseHandler):
         cur = conn.cursor()
         
         user_id = None
+        name = json['name']
         
         added_user = False
 
@@ -75,7 +76,7 @@ class AuthHandler(BaseHandler):
         
         # Send confirmation of success
         self.content_type = 'application/json'
-        details = {'status':'success', 'fb_auth_key': fb_auth_key, 'fb_expires':fb_expires, 'user_id':user_id}
+        details = {'status':'success', 'fb_auth_key': fb_auth_key, 'fb_expires':fb_expires, 'user_id':user_id, 'name': name}
         self.write(details)
 
 
