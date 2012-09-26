@@ -91,6 +91,16 @@ class CommentsHandler(BaseHandler):
             if found == True:
                 self.content_type = 'application/json'
                 details = {'status':'success', 'user_id':user_id}
+
+                result = table.query(
+                    hash_key = "spotting_%s" % fb_post_id) 
+                items = []  
+            
+                for item in result:
+                    items.append(item)        
+
+                details['results'] = items 
+                
                 self.write(details)
             else:
                 raise tornado.web.HTTPError(404)
