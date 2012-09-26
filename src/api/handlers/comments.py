@@ -51,14 +51,14 @@ class CommentsHandler(BaseHandler):
                 
         # Move this to BaseAuthHandler
         if comment_type == "" or fb_auth_key == "" or fb_expires == "" or (comment_type == "chat" and comment_message == ""):
-            raise tornado.web.HTTPError(403)
+            raise tornado.web.HTTPError(400)
                 
         graph = facebook.GraphAPI(fb_auth_key, timeout=5)
 
         try:
            json = graph.get_object("me", fields="id,name")
         except:
-            raise tornado.web.HTTPError(403)
+            raise tornado.web.HTTPError(500)
                         
         conn = MySQLdb.connect (host="hugo.caqu3caxjsdg.us-west-1.rds.amazonaws.com", user="hugo", passwd="Huego415",port=3306, db=("hugo_%s"%os.environ['HUGO_ENV'].lower()))
         cur = conn.cursor()
@@ -69,32 +69,56 @@ class CommentsHandler(BaseHandler):
             if cur.execute("SELECT user_id FROM hugo_%s.users WHERE facebook_id = '%s'" % (os.environ['HUGO_ENV'].lower(), json['id'])) != 0:            
                 user_id = cur.fetchone()[0]                
             else:
-                raise tornado.web.HTTPError(403)
+                raise tornado.web.HTTPError(400)
         except:
-            raise tornado.web.HTTPError(403)
+            raise tornado.web.HTTPError(500)
 
         dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
                                    aws_secret_access_key='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')
         table = dbconn.get_table("newsfeed_data")
                 
-        item_attr = {
+        if comment_type=='unlike':
+            found = False
+            result = table.query(
+                    hash_key = "spotting_%s" % fb_post_id, 
+                    range_key_condition = BEGINS_WITH("%d_" % (user_id)))
+
+            for item in result:           
+                if item['comment_type'] == 'like':
+                    item.delete() 
+                    found = True
+            
+            if found == True:
+                self.content_type = 'application/json'
+                details = {'status':'success', 'user_id':user_id}
+                self.write(details)
+            else:
+                raise tornado.web.HTTPError(404)
+        elif comment_type=="like" or comment_type == "chat":
+            try:    
+                item_attr = {
                         'bundle_id': "spotting_%s" % (fb_post_id),
                         'bundle_timestamp' : "%d_%d" % (user_id,int(time.mktime(time.gmtime()))),
+                        'user_id' : user_id,
                         'timestamp' : int(time.mktime(time.gmtime())),
                         'comment_type' : comment_type,
-                        'comment_message' : comment_message
-            }
-        
-        try:
-            dItem = table.new_item(attrs=item_attr)
-            dItem.put()
-        except:
-            raise tornado.web.HTTPError(403)
+                        }
+
+                if comment_message != "":
+                    item_attr['comment_message'] = comment_message
+                
+                dItem = table.new_item(attrs=item_attr)
+                dItem.put()
+            except:
+                print sys.exc_info()
+                raise tornado.web.HTTPError(403)
                     
-        # Send confirmation of success
-        self.content_type = 'application/json'
-        details = {'status':'success', 'user_id':user_id}
-        self.write(details)
+            # Send confirmation of success
+            self.content_type = 'application/json'
+            details = {'status':'success', 'user_id':user_id}
+            self.write(details)
+        else:
+            raise tornado.web.HTTPError(404)
 
 
         
