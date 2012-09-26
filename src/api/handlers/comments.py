@@ -91,6 +91,7 @@ class CommentsHandler(BaseHandler):
             self.content_type = 'application/json'
             details = {'status':'success', 'user_id':user_id}
             details['results'] = filteredComments 
+            self.write(details)
         elif comment_type=="like" or comment_type == "chat":
             item = None
 
