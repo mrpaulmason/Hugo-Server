@@ -22,6 +22,7 @@ class NewsHandler(BaseHandler):
         dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
                                    aws_secret_access_key='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')
         table = dbconn.get_table("newsfeed_data")
+        commentTable = dbconn.get_table("comment_data")
 
         result = table.query(
             hash_key = "%s_%d" % (prefix, int(hugo_id)), 
@@ -29,21 +30,17 @@ class NewsHandler(BaseHandler):
             scan_index_forward = False)
 
         items = []  
+        itemList = []
+        dynamoBatch = dbconn.new_batch_list()
             
         for item in result:
+            itemList.append(str(item['id']))
             items.append(item)        
             
-        for item in items:
-            commentResults = dbconn.query(table,
-                hash_key = "spotting_%s" % item['id'])
-            
-            comments = []  
-            for comment in commentResults:
-                print comment
-                comments.append(comment)        
-                
-            item['comments'] = comments 
-
+        dynamoBatch.add_batch(commentTable, itemList)
+        
+        data = dynamoBatch.submit()
+        print data
                         
         self.set_header("Content-Type", "application/json; charset=UTF-8")
         self.write(simplejson.dumps(items,sort_keys=True, indent=4))

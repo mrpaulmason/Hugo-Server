@@ -24,19 +24,13 @@ class CommentsHandler(BaseHandler):
         
         dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
                                    aws_secret_access_key='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')
-        table = dbconn.get_table("newsfeed_data")
-        result = table.query(
-            hash_key = "spotting_%s" % fb_post_id) 
+        table = dbconn.get_table("comment_data")
+        
+        item = table.get_item("spotting_%s" % fb_post_id)
 
         json_response = {}
         json_response['post_id'] = fb_post_id
-
-        items = []  
-            
-        for item in result:
-            items.append(item)        
-
-        json_response['results'] = items 
+        json_response['results'] = simplejson.loads(item['comments']) 
                         
         self.set_header("Content-Type", "application/json; charset=UTF-8")
         self.write(simplejson.dumps(json_response,sort_keys=True, indent=4))
@@ -75,65 +69,59 @@ class CommentsHandler(BaseHandler):
 
         dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
                                    aws_secret_access_key='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')
-        table = dbconn.get_table("newsfeed_data")
+        table = dbconn.get_table("comment_data")
                 
         if comment_type=='unlike':
-            found = False
-            result = table.query(
-                    hash_key = "spotting_%s" % fb_post_id, 
-                    range_key_condition = BEGINS_WITH("%d_" % (user_id)))
-
-            for item in result:           
-                if item['comment_type'] == 'like':
-                    item.delete() 
-                    found = True
-            
-            if found == True:
-                self.content_type = 'application/json'
-                details = {'status':'success', 'user_id':user_id}
-
-                result = table.query(
-                    hash_key = "spotting_%s" % fb_post_id) 
-                items = []  
-            
-                for item in result:
-                    items.append(item)        
-
-                details['results'] = items 
-                
-                self.write(details)
-            else:
+            try:
+                item = table.get_item("spotting_%s" % fb_post_id)
+            except:
                 raise tornado.web.HTTPError(404)
+            
+            comments = simplejson.load(item['comments'])
+            
+            filteredComments = [x for x in comments if not (x['comment_type'] == "like" and x['user_id'] == user_id) ]
+            
+            item['comments'] = simplejson.dumps(filteredComments)
+
+            try:
+                item.save()
+            except:
+                raise tornado.web.HTTPError(500)
+            
+            self.content_type = 'application/json'
+            details = {'status':'success', 'user_id':user_id}
+            details['results'] = filteredComments 
         elif comment_type=="like" or comment_type == "chat":
+            item = None
+
             try:    
-                item_attr = {
-                        'bundle_id': "spotting_%s" % (fb_post_id),
-                        'bundle_timestamp' : "%d_%d" % (user_id,int(time.mktime(time.gmtime()))),
+                item = table.get_item("spotting_%s" % fb_post_id)
+            except:
+                item = table.new_item(hash_key="spotting_%s" % fb_post_id)
+                
+            try:
+                comments = simplejson.loads(item['comments'])
+            except:
+                comments = []            
+
+            item_attr = {
                         'user_id' : user_id,
                         'timestamp' : int(time.mktime(time.gmtime())),
+                        'comment_message' : comment_message,
                         'comment_type' : comment_type,
                         }
 
-                if comment_message != "":
-                    item_attr['comment_message'] = comment_message
-                
-                dItem = table.new_item(attrs=item_attr)
-                dItem.put()
+            comments.append(item_attr)
+            item['comments'] = simplejson.dumps(comments)
+
+            try:
+                item.save()
             except:
-                print sys.exc_info()
-                raise tornado.web.HTTPError(403)
+                raise tornado.web.HTTPError(500)
                     
             # Send confirmation of success
             details = {'status':'success', 'user_id':user_id, 'item_data': item_attr}
-
-            result = table.query(
-                hash_key = "spotting_%s" % fb_post_id) 
-            items = []  
-            
-            for item in result:
-                items.append(item)        
-
-            details['results'] = items 
+            details['results'] = comments 
             
             self.content_type = 'application/json'
             self.write(details)
