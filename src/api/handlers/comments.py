@@ -29,13 +29,17 @@ class CommentsHandler(BaseHandler):
 
         json_response = {}
 
-        if comment_type == "spotting":
-            json_response['post_id'] = fb_post_id
-            item = table.get_item("spotting_%s" % fb_post_id)
-        else:
-            json_response['spot_id'] = fb_post_id
-            json_response['user_id'] = user_id
-            item = table.get_item("spot_%s_%s" % (user_id, fb_post_id))
+        try:
+            if comment_type == "spotting":
+                json_response['post_id'] = fb_post_id
+                item = table.get_item("spotting_%s" % fb_post_id)
+            else:
+                json_response['spot_id'] = fb_post_id
+                json_response['user_id'] = user_id
+                item = table.get_item("spot_%s_%s" % (user_id, fb_post_id))
+        except:
+            item = {}
+            item['comments'] = "[]"
 
         json_response['results'] = simplejson.loads(item['comments']) 
                         
