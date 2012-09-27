@@ -36,8 +36,8 @@ class NewsHandler(BaseHandler):
         for item in result:
             try:
                 commentItem = commentTable.get_item("spotting_%d" % item['id'])
-#                statusItem = commentTable.get_item("spot_%d_%d" % (int(hugo_id), item['id']))
-#                item['statuses'] = simplejson.loads(statusItem['comments'])
+                statusItem = commentTable.get_item("spot_%d_%d" % (int(hugo_id), item['fb_place_id']))
+                item['statuses'] = simplejson.loads(statusItem['comments'])
                 item['comments'] = simplejson.loads(commentItem['comments'])
                 if 'spot_message' in item:
                     item['spot_message'] = simplejson.loads(item['spot_message'])
