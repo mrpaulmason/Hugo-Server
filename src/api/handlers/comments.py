@@ -16,20 +16,27 @@ logger = logging.getLogger()
 
 class CommentsHandler(BaseHandler):
     def get(self):
+        comment_type = self.get_argument("comment_type", "spotting")
+        user_id = self.get_argument("user_id","")
         fb_post_id = self.get_argument("fb_post_id","")
+
         if fb_post_id == "":
             raise tornado.web.HTTPError(403)
-        
-        print fb_post_id
-        
+                
         dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
                                    aws_secret_access_key='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')
         table = dbconn.get_table("comment_data")
-        
-        item = table.get_item("spotting_%s" % fb_post_id)
 
         json_response = {}
-        json_response['post_id'] = fb_post_id
+
+        if comment_type == "spotting":
+            json_response['post_id'] = fb_post_id
+            item = table.get_item("spotting_%s" % fb_post_id)
+        else:
+            json_response['spot_id'] = fb_post_id
+            json_response['user_id'] = user_id
+            item = table.get_item("spot_%s_%s" % (user_id, fb_post_id))
+
         json_response['results'] = simplejson.loads(item['comments']) 
                         
         self.set_header("Content-Type", "application/json; charset=UTF-8")
@@ -92,6 +99,41 @@ class CommentsHandler(BaseHandler):
             details = {'status':'success', 'user_id':user_id}
             details['results'] = filteredComments 
             self.write(details)
+        elif comment_type=="spot_status":
+            item = None
+            
+            try:
+                item = table.get_item("spot_%d_%s" % (user_id, fb_post_id))
+            except:
+                item = table.new_item(hash_key="spot_%d_%s" % (user_id, fb_post_id))
+                
+            try:
+                statuses = simplejson.loads(item['comments'])
+            except:
+                statuses = []
+                
+            item_attr = {
+                        'user_id' : user_id,
+                        'timestamp' : int(time.mktime(time.gmtime())),
+                        'comment_message' : comment_message,
+                        'comment_type' : comment_type,
+                        'name' : json['name']
+                        }
+
+            statuses.append(item_attr)
+            item['comments'] = simplejson.dumps(statuses)
+
+            try:
+                item.save()
+            except:
+                raise tornado.web.HTTPError(500)
+                    
+            # Send confirmation of success
+            details = {'status':'success', 'user_id':user_id}
+            details['results'] = statuses 
+            
+            self.content_type = 'application/json'
+            self.write(details)                
         elif comment_type=="like" or comment_type == "chat":
             item = None
 
