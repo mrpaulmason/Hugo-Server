@@ -118,6 +118,7 @@ class CommentsHandler(BaseHandler):
                 
             item_attr = {
                         'user_id' : user_id,
+                        'place_id' : fb_post_id,
                         'timestamp' : int(time.mktime(time.gmtime())),
                         'comment_message' : comment_message,
                         'comment_type' : comment_type,
