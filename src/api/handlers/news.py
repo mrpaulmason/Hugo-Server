@@ -4,7 +4,7 @@ import code, operator
 
 import boto.dynamodb
 import time, simplejson
-import geohash
+import geohash, sys
 
 import logging
 logger = logging.getLogger()
@@ -36,14 +36,19 @@ class NewsHandler(BaseHandler):
         for item in result:
             try:
                 commentItem = commentTable.get_item("spotting_%d" % item['id'])
+                item['comments'] = simplejson.loads(commentItem['comments'])
+            except:
+                item['comments'] = []
+
+            try:                
                 statusItem = commentTable.get_item("spot_%d_%d" % (int(hugo_id), item['fb_place_id']))
                 item['statuses'] = simplejson.loads(statusItem['comments'])
-                item['comments'] = simplejson.loads(commentItem['comments'])
-                if 'spot_message' in item:
-                    item['spot_message'] = simplejson.loads(item['spot_message'])
             except:
-                pass
- #           itemList.append("spotting_%d" % item['id'])
+                item['statuses'] = []
+
+            if 'spot_message' in item:
+                item['spot_message'] = simplejson.loads(item['spot_message'])
+
             items.append(item)        
             
 #        dynamoBatch.add_batch(commentTable, itemList)
