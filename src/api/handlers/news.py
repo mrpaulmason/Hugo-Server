@@ -49,6 +49,9 @@ class NewsHandler(BaseHandler):
             if 'spot_message' in item:
                 item['spot_message'] = simplejson.loads(item['spot_message'])
 
+            if 'spot_phone' in item:
+                item['spot_phone'] = simplejson.loads(item['spot_phone'])
+
             items.append(item)        
             
 #        dynamoBatch.add_batch(commentTable, itemList)
