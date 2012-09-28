@@ -89,7 +89,6 @@ class AuthHandler(BaseHandler):
             item = table.new_item(hash_key="%s" % str(json['id']))                    
                 
         item['hugo_id'] = str(user_id)
-        item.update(json) 
         
         try:       
             item.save()
