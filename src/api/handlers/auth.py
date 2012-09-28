@@ -91,14 +91,12 @@ class AuthHandler(BaseHandler):
         json['hugo_id'] = str(user_id)
         item.update(json)
         
-        try:
-            if hasRecord:
-                item.save()
-            else:
-                item.put()
-        except:
-            raise tornado.web.HTTPError(500)
         
+        if hasRecord:
+            item.save()
+        else:
+            item.put()
+                
         # Send confirmation of success
         self.content_type = 'application/json'
         details = {'status':'success', 'fb_auth_key': fb_auth_key, 'fb_expires':fb_expires, 'user_id':user_id, 'name': name}
