@@ -33,6 +33,7 @@ class PlacesHandler(BaseHandler):
         category = self.get_argument("category","")
         signature = self.get_argument("signature","")
         fb_place_id = self.get_argument("fb_place_id","")
+        precision = self.get_argument("precision", 6)
         
         if category == "All Nearby":
             category = ""
@@ -41,8 +42,6 @@ class PlacesHandler(BaseHandler):
                                    aws_secret_access_key='DFl2zvMPXV4qQ9XuGyM9I/s9nZVmkmOBp2jT7jF6')
         table = dbconn.get_table("checkin_data")
         tableComments = dbconn.get_table("comment_data")
-
-        precision = 6
 
         while True:
                         
@@ -181,7 +180,11 @@ class CategoriesHandler(BaseHandler):
                 break
 
         cats.insert(0,"All Nearby")
+        
+        json = {}
+        json['precision'] = precision
+        json['categories'] = cats
 
         self.set_header("Content-Type", "application/json; charset=UTF-8")
-        self.write(simplejson.dumps(cats,sort_keys=True, indent=4))
+        self.write(simplejson.dumps(json,sort_keys=True, indent=4))
         
