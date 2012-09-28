@@ -100,6 +100,9 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
                         'spot_website' : simplejson.dumps(item['spot_website'])
             }
 
+            if 'author_hugo_id' in item:
+                item_attr['author_hugo_id'] = item['author_hugo_id']
+
             # Convert bad photo checkins to regular checkins
             try:
                 if item_attr['type'] == 'photo':
@@ -181,7 +184,8 @@ def updateCheckins(hugo_id, dbconn, data):
                         'spot_website' : simplejson.dumps(item['spot_website'])
             }
             
-
+            if 'author_hugo_id' in item:
+                item_attr['author_hugo_id'] = item['author_hugo_id']
 
             # Convert bad photo checkins to regular checkins
             try:
