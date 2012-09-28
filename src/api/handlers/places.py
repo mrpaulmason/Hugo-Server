@@ -4,7 +4,7 @@ import code, operator
 
 import boto.dynamodb
 import time, simplejson
-import geohash
+import geohash, sys
 
 import logging
 logger = logging.getLogger()
@@ -40,6 +40,7 @@ class PlacesHandler(BaseHandler):
         dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
                                    aws_secret_access_key='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')
         table = dbconn.get_table("checkin_data")
+        tableComments = dbconn.get_table("comment_data")
 
         precision = 6
 
@@ -71,18 +72,29 @@ class PlacesHandler(BaseHandler):
 
                     if found['spot_checkins'] < item['spot_checkins']:
                         found['spot_checkins'] = item['spot_checkins']
-                    
+                                            
+                    if 'author_hugo_id' in item:
+                        found['authors_hugo'].append((item['author_uid'], item['author_hugo_id']))
+                        
                     found['authors'].append(item['author_uid'])
                     found['pics'].append(item['author_image'])
                 else:
+                    if 'author_hugo_id' in item:
+                        item['authors_hugo'] = [(item['author_uid'], item['author_hugo_id'])]
+                    else:
+                        item['authors_hugo'] = []
                     item['authors'] = [item['author_uid']]
                     item['pics'] = [item['author_image']]
-                    items.append(item)        
+                    if fb_place_id == "":
+                        items.append(item)        
+                    elif str(item['fb_place_id']) == fb_place_id:
+                        items.append(item)
+                        
             
             items = sorted(items, key=operator.itemgetter('spot_checkins'))
             items.reverse()
             
-            if (len(items) < 1 or (category == "" and len(items) < 5)) and precision > 4:
+            if (len(items) < 1 or (category == "" and fb_place_id == "" and len(items) < 5)) and precision > 4:
                 precision = precision - 1
                 continue
             else:
@@ -91,9 +103,25 @@ class PlacesHandler(BaseHandler):
         self.set_header("Content-Type", "application/json; charset=UTF-8")
             
         for item in items:
-            if str(item['fb_place_id']) == fb_place_id and fb_place_id != "":
-                self.write(simplejson.dumps(item, sort_keys=True, indent=4))
-                return
+            dStatus = {}
+            for x,y in item['authors_hugo']:
+                print x,y
+                try:
+                    commentsRow = tableComments.get_item(hash_key='spot_%s_%s' % (str(y), fb_place_id))
+                    commentsData = simplejson.loads(commentsRow['comments'])
+                    lTimestamp = None
+                    lComment = None
+                    for comment in commentsData:
+                        if comment['comment_type'] == "spot_status" and lTimestamp == None or comment['timestamp'] > lTimestamp:
+                            lTimestamp = comment['timestamp']
+                            lComment = comment['comment_message']                                                             
+                    dStatus[x] = (lTimestamp, lComment)
+                except:
+                    print 'spot_%s_%s' % (str(y), fb_place_id)
+                    print sys.exc_info()
+                    pass
+            item['spot_statuses'] = dStatus
+
                     
         self.write(simplejson.dumps(items,sort_keys=True, indent=4))
         
