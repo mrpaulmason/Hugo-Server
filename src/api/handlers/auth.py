@@ -79,9 +79,12 @@ class AuthHandler(BaseHandler):
         dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
                                aws_secret_access_key='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')
         table = dbconn.get_table("fb_hugo")
+        
+        hasRecord = False
             
         try:    
             item = table.get_item("%s" % str(json['id']))
+            hasRecord = True
         except:
             item = table.new_item(hash_key="%s" % str(json['id']))                    
                 
@@ -89,7 +92,10 @@ class AuthHandler(BaseHandler):
         item.update(json)
         
         try:
-            item.save()
+            if hasRecord:
+                item.save()
+            else:
+                item.put()
         except:
             raise tornado.web.HTTPError(500)
         
