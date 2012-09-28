@@ -87,7 +87,7 @@ class AuthHandler(BaseHandler):
             hasRecord = True
         except:
             item = table.new_item(hash_key="%s" % str(json['id']))                    
-            item['places'] = set()
+#            item['places'] = set()
                 
         item['hugo_id'] = str(user_id)
         
