@@ -290,10 +290,10 @@ def query_checkins(hugo_id, oauth_access_token, origin, timestamp, delta):
                             aws_secret_access_key='DFl2zvMPXV4qQ9XuGyM9I/s9nZVmkmOBp2jT7jF6')
 
     table = dbconn.get_table("fb_hugo")
-                
+                    
     for i in range(0,len(query1)):
         try:    
-            item = table.get_item("%s" % str(query1[i]['author_id']))
+            item = table.get_item("%s" % str(query1[i]['author_uid']))
             query1[i]['author_hugo_id'] = item['hugo_id']
         except:
             print sys.exc_info()
