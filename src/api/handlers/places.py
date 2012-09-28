@@ -107,7 +107,7 @@ class PlacesHandler(BaseHandler):
             dStatus = {}
             
             try:                
-                statusItem = commentTable.get_item("spot_%d_%d" % (item['user_id'], fb_place_id))
+                statusItem = tableComments.get_item("spot_%d_%d" % (item['user_id'], fb_place_id))
                 item['statuses'] = simplejson.loads(statusItem['comments'])
             except:
                 item['statuses'] = []
