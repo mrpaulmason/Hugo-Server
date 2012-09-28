@@ -84,9 +84,9 @@ class AuthHandler(BaseHandler):
             try:
                 item.save()
             except:
-                print sys.exc_info()
                 raise tornado.web.HTTPError(500)
         except:
+            print sys.exc_info()
             raise tornado.web.HTTPError(403)
             
         if added_user:
