@@ -299,6 +299,10 @@ def query_checkins(hugo_id, oauth_access_token, origin, timestamp, delta):
         try:    
             item = table.get_item("%s" % str(query1[i]['author_uid']))
             query1[i]['author_hugo_id'] = item['hugo_id']
+            
+            # if me_uid = author_uid
+            # add been here mark
+            
         except:
             print sys.exc_info()
             pass

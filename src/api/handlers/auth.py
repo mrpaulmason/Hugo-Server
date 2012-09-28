@@ -58,7 +58,7 @@ class AuthHandler(BaseHandler):
 
         try:
             if cur.execute("SELECT user_id FROM hugo_%s.users WHERE facebook_id = '%s'" % (os.environ['HUGO_ENV'].lower(), json['id'])) == 0:            
-                query = ("INSERT INTO users (facebook_id, facebook_auth_key, facebook_expires, name, first_name, last_name, picture, friends, location_data) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)")
+                query = ("INSERT INTO users (facebook_id, facebook_auth_key, facebook_expires, name, first_name, last_name, picture, friends, current_location) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)")
                 cur.execute(query, (json['id'], fb_auth_key, fb_expires, json['name'], json['first_name'], json['last_name'], json['picture']['data']['url'], simplejson.dumps(json['friends']['data']), simplejson.dumps(location_data)))
                 conn.commit()
                 user_id = cur.lastrowid
