@@ -88,11 +88,7 @@ class AuthHandler(BaseHandler):
         json['hugo_id'] = user_id
         item.update(json)
         
-        try:
-            item.save()
-        except:
-            print sys.exc_info()
-            raise tornado.web.HTTPError(500)
+        item.save()
         
         # Send confirmation of success
         self.content_type = 'application/json'
