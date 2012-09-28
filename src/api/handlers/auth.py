@@ -22,15 +22,16 @@ class AuthHandler(BaseHandler):
         cur = conn.cursor()
         
         try:
-            query = ("SELECT name, picture, friends, current_location from hugo_%s.users where user_id = '%s'")
-            cur.execute(query, (os.environ['HUGO_ENV'].lower(), user_id))
+            query = ("SELECT name, picture, friends, current_location from hugo_%s.users where user_id =" % os.environ['HUGO_ENV'].lower())
+            query = query + "%s"
+            cur.execute(query, (user_id))
             row = cur.fetchone()
         except:
             print sys.exc_info()
             raise tornado.web.HTTPError(403)            
         # Send confirmation of success
         self.content_type = 'application/json'
-        details = {'status':'success', 'name': row[0], 'picture':row[1], 'friends':row[2], 'current_location': row[3]}
+        details = {'status':'success', 'name': row[0], 'picture':row[1], 'friends':len(simplejson.loads(row[2])), 'current_location': row[3]}
         self.write(details)
         
             
