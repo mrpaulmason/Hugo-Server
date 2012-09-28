@@ -89,7 +89,9 @@ class AuthHandler(BaseHandler):
             item = table.new_item(hash_key="%s" % str(json['id']))                    
                 
         json['hugo_id'] = str(user_id)
+        print json
         item.update(json)
+        print item
         
         
         if hasRecord:
