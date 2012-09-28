@@ -91,8 +91,8 @@ class PlacesHandler(BaseHandler):
         self.set_header("Content-Type", "application/json; charset=UTF-8")
             
         for item in items:
-            if item['fb_place_id'] == fb_place_id and fb_place_id != "":
-                self.write(simplejson.dumps(item), sort_keys=True, indent=4)
+            if str(item['fb_place_id']) == fb_place_id and fb_place_id != "":
+                self.write(simplejson.dumps(item, sort_keys=True, indent=4))
                 return
                     
         self.write(simplejson.dumps(items,sort_keys=True, indent=4))
