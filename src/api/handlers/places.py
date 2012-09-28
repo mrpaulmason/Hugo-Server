@@ -32,6 +32,7 @@ class PlacesHandler(BaseHandler):
         longitude = self.get_argument("long", "-122.4661777")
         category = self.get_argument("category","")
         signature = self.get_argument("signature","")
+        fb_place_id = self.get_argument("fb_place_id","")
         
         if category == "All Nearby":
             category = ""
@@ -88,6 +89,12 @@ class PlacesHandler(BaseHandler):
                 break
 
         self.set_header("Content-Type", "application/json; charset=UTF-8")
+            
+        for item in items:
+            if item['fb_place_id'] == fb_place_id and fb_place_id != "":
+                self.write(simplejson.dumps(item), sort_keys=True, indent=4)
+                return
+                    
         self.write(simplejson.dumps(items,sort_keys=True, indent=4))
         
 class CategoriesHandler(BaseHandler):
