@@ -33,7 +33,9 @@ class PlacesHandler(BaseHandler):
         category = self.get_argument("category","")
         signature = self.get_argument("signature","")
         fb_place_id = self.get_argument("fb_place_id","")
-        precision = self.get_argument("precision", 6)
+        precision = self.get_argument("precision", "6")
+        
+        precision = int(precision)
         
         if category == "All Nearby":
             category = ""
