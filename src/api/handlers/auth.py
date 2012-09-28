@@ -16,8 +16,24 @@ logger = logging.getLogger()
 
 class AuthHandler(BaseHandler):
     def get(self):
-        self.write("Error, no parameters were passed")
-    
+        user_id = self.get_argument("user_id")
+
+        conn = MySQLdb.connect (host="hugo.caqu3caxjsdg.us-west-1.rds.amazonaws.com", user="hugo", passwd="Huego415",port=3306, db=("hugo_%s"%os.environ['HUGO_ENV'].lower()))
+        cur = conn.cursor()
+        
+        try:
+            query = ("SELECT name, picture, friends, current_location from hugo_%s.users where user_id = '%s'")
+            cur.execute(query, (os.environ['HUGO_ENV'].lower(), user_id))
+            row = cur.fetchone()
+        except:
+            print sys.exc_info()
+            raise tornado.web.HTTPError(403)            
+        # Send confirmation of success
+        self.content_type = 'application/json'
+        details = {'status':'success', 'name': row[0], 'picture':row[1], 'friends':row[2], 'current_location': row[3]}
+        self.write(details)
+        
+            
     # TODO: Vulnerable for injection
     def post(self):
         fb_auth_key = self.get_argument("fb_auth_key", "")
