@@ -70,21 +70,22 @@ class AuthHandler(BaseHandler):
                 conn.commit()
                 added_user = False
 
-                dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
+            dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
                                    aws_secret_access_key='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')
-                table = dbconn.get_table("fb_hugo")
+            table = dbconn.get_table("fb_hugo")
                 
-                try:    
-                    item = table.get_item("%s" % str(json['id']))
-                except:
-                    item = table.new_item(hash_key="%s" % str(json['id']))                    
+            try:    
+                item = table.get_item("%s" % str(json['id']))
+            except:
+                item = table.new_item(hash_key="%s" % str(json['id']))                    
                     
-                json['hugo_id'] = user_id
-                item.update(json)
-                try:
-                    item.save()
-                except:
-                    raise tornado.web.HTTPError(500)
+            json['hugo_id'] = user_id
+            item.update(json)
+            try:
+                item.save()
+            except:
+                print sys.exc_info()
+                raise tornado.web.HTTPError(500)
         except:
             raise tornado.web.HTTPError(403)
             
