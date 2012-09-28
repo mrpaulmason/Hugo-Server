@@ -288,6 +288,16 @@ def query_checkins(hugo_id, oauth_access_token, origin, timestamp, delta):
                                                         
     dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
                             aws_secret_access_key='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')
+
+    table = dbconn.get_table("fb_hugo")
+                
+    for i in range(0,len(query1)):
+        try:    
+            item = table.get_item("%s" % str(query1[i]['author_id']))
+            query1[i]['author_hugo_id'] = item['hugo_id']
+        except:
+            print sys.exc_info()
+            pass
     
     updateCheckins(hugo_id, dbconn, query1)                
     updateNewsfeed(hugo_id, dbconn, origin, query1)                

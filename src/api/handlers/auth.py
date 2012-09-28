@@ -8,7 +8,8 @@ import simplejson
 import sys
 import MySQLdb
 #import hugo.fb
-
+from boto.dynamodb.condition import *
+import boto.dynamodb
 
 logger = logging.getLogger()
 
@@ -68,6 +69,22 @@ class AuthHandler(BaseHandler):
                 cur.execute(query, (fb_auth_key, fb_expires, simplejson.dumps(json['friends']['data']), simplejson.dumps(location_data), user_id))
                 conn.commit()
                 added_user = False
+
+                dbconn = boto.dynamodb.connect_to_region('us-west-1', aws_access_key_id='AKIAJG4PP3FPHEQC76HQ',
+                                   aws_secret_access_key='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')
+                table = dbconn.get_table("fb_hugo")
+                
+                try:    
+                    item = table.get_item("%s" % str(json['id']))
+                except:
+                    item = table.new_item(hash_key="%s" % str(json['id']))                    
+                    
+                json['hugo_id'] = user_id
+                item.update(json)
+                try:
+                    item.save()
+                except:
+                    raise tornado.web.HTTPError(500)
         except:
             raise tornado.web.HTTPError(403)
             
