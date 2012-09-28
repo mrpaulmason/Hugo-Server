@@ -107,15 +107,16 @@ class PlacesHandler(BaseHandler):
             dStatus = {}
             
             try:                
-                statusItem = tableComments.get_item("spot_%d_%d" % (item['user_id'], fb_place_id))
+                statusItem = tableComments.get_item("spot_%s_%s" % (item['user_id'], item['fb_place_id']))
                 item['statuses'] = simplejson.loads(statusItem['comments'])
             except:
+                print "spot_%s_%s" % (item['user_id'], fb_place_id),sys.exc_info()
                 item['statuses'] = []
             
             for x,y in item['authors_hugo']:
                 print x,y
                 try:
-                    commentsRow = tableComments.get_item(hash_key='spot_%s_%s' % (str(y), fb_place_id))
+                    commentsRow = tableComments.get_item(hash_key='spot_%s_%s' % (str(y), item['fb_place_id']))
                     commentsData = simplejson.loads(commentsRow['comments'])
                     lTimestamp = None
                     lComment = None
