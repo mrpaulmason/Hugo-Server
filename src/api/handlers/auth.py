@@ -85,10 +85,13 @@ class AuthHandler(BaseHandler):
         except:
             item = table.new_item(hash_key="%s" % str(json['id']))                    
                 
-        json['hugo_id'] = user_id
+        json['hugo_id'] = str(user_id)
         item.update(json)
         
-        item.save()
+        try:
+            item.save()
+        except:
+            raise tornado.web.HTTPError(500)
         
         # Send confirmation of success
         self.content_type = 'application/json'
