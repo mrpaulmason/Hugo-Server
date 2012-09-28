@@ -105,6 +105,13 @@ class PlacesHandler(BaseHandler):
             
         for item in items:
             dStatus = {}
+            
+            try:                
+                statusItem = commentTable.get_item("spot_%d_%d" % (item['user_id'], fb_place_id))
+                item['statuses'] = simplejson.loads(statusItem['comments'])
+            except:
+                item['statuses'] = []
+            
             for x,y in item['authors_hugo']:
                 print x,y
                 try:
