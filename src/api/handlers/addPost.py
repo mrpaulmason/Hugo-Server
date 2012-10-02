@@ -37,7 +37,7 @@ class AddPostHandler(BaseHandler):
         graph = facebook.GraphAPI(fb_auth_key, timeout=5)
 
         try:
-           json = graph.get_object("me", fields="id,name,picture")
+           json = graph.get_object("me", fields="id,name,picture,friends")
            place = graph.get_object(fb_place_id, fields="id,name,location,category,hours,phone,website,checkins")
         except:
             raise tornado.web.HTTPError(500)
@@ -60,6 +60,7 @@ class AddPostHandler(BaseHandler):
         table = dbconn.get_table("comment_data")
         tableNewsfeed = dbconn.get_table("newsfeed_data")
         tableCheckin = dbconn.get_table("checkin_data")
+        tableFBHugo = dbconn.get_table("fb_hugo")
 
         # Update own newsfeed
         item_attr = {
@@ -117,6 +118,17 @@ class AddPostHandler(BaseHandler):
         dItem.put()
 
         # Loop through all friends and add update
+        
+        for friend in json['friends']['data']:
+            try:
+                fArr = tableFBHugo.get_item(friend['id'])
+                item_attr['me_uid'] = friend['id']
+                item_attr['bundle_id'] = "newsfeed_%s" % (fArr['hugo_id'])
+                dItem = tableNewsfeed.new_item(attrs=item_attr)
+                dItem.put()                 
+            except:
+                print sys.exc_info()
+                pass            
                 
         # Add statuses to comment table
         item = None
