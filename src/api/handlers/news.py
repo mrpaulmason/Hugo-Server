@@ -35,7 +35,7 @@ class NewsHandler(BaseHandler):
             
         for item in result:
             try:
-                commentItem = commentTable.get_item("spotting_%d" % int(item['id']))
+                commentItem = commentTable.get_item("spotting_%s" % str(item['id']))
                 item['comments'] = simplejson.loads(commentItem['comments'])
             except:
                 item['comments'] = []
