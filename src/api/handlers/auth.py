@@ -7,7 +7,7 @@ import time
 import simplejson
 import sys
 import MySQLdb
-#import hugo.fb
+import hugo.fb
 from boto.dynamodb.condition import *
 import boto.dynamodb
 

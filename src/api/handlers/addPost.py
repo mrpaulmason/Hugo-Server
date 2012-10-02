@@ -127,7 +127,7 @@ class AddPostHandler(BaseHandler):
                 dItem = tableNewsfeed.new_item(attrs=item_attr)
                 dItem.put()                 
             except:
-                print sys.exc_info()
+#                print sys.exc_info()
                 pass            
                 
         # Add statuses to comment table
