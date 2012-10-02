@@ -93,7 +93,12 @@ class AddPostHandler(BaseHandler):
                     'photo_height' : photo_height,
                     'photo_src' : photo_src
                     })
-                
+        
+        if spot_message != "":
+            item_attr.update({
+                'spot_message': spot_message,
+                })        
+
         dItem = tableNewsfeed.new_item(attrs=item_attr)
         dItem.put()
         dItem = tableCheckin.new_item(attrs=item_attr)
