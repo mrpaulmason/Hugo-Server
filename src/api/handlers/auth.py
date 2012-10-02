@@ -22,7 +22,7 @@ class AuthHandler(BaseHandler):
         cur = conn.cursor()
         
         try:
-            query = ("SELECT name, picture, friends, current_location from hugo_%s.users where facebook_id =" % os.environ['HUGO_ENV'].lower())
+            query = ("SELECT name, picture, friends, current_location from hugo_%s.users where user_id =" % os.environ['HUGO_ENV'].lower())
             query = query + "%s"
             cur.execute(query, (user_id))
             row = cur.fetchone()
