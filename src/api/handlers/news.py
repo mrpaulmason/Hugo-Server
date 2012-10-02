@@ -47,7 +47,10 @@ class NewsHandler(BaseHandler):
                 item['statuses'] = []
 
             if 'spot_message' in item:
-                item['spot_message'] = simplejson.loads(item['spot_message'])
+                try:
+                    item['spot_message'] = simplejson.loads(item['spot_message'])
+                except:
+                    pass
 
             if 'spot_phone' in item:
                 item['spot_phone'] = simplejson.loads(item['spot_phone'])
