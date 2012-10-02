@@ -81,11 +81,23 @@ class AddPostHandler(BaseHandler):
                     'source' : 'hugo',
                     'spot_name' : place['name'],
                     'spot_category' : place['category'],
-                    'spot_location' : simplejson.dumps(place['location']),
-                    'spot_hours' : simplejson.dumps(place['hours']),
-                    'spot_phone' : simplejson.dumps(place['phone']),
-                    'spot_website' : simplejson.dumps(place['website'])
+                    'spot_location' : simplejson.dumps(place['location'])
         }
+                
+        if 'hours' in place:
+            item_attr.update({
+                'spot_hours':simplejson.dumps(place['hours'])
+            })
+
+        if 'phone' in place:
+            item_attr.update({
+                'spot_phone':simplejson.dumps(place['phone'])
+            })
+
+        if 'website' in place:
+            item_attr.update({
+                'spot_website':simplejson.dumps(place['website'])
+            })
         
         if photo_src != "":
                 item_attr.update({
