@@ -96,7 +96,7 @@ class AddPostHandler(BaseHandler):
         
         if spot_message != "":
             item_attr.update({
-                'spot_message': spot_message,
+                'spot_message': simplejson.dumps(item['spot_message']),
                 })        
 
         dItem = tableNewsfeed.new_item(attrs=item_attr)
