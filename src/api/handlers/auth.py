@@ -22,18 +22,16 @@ class AuthHandler(BaseHandler):
         cur = conn.cursor()
         
         try:
-            query = ("SELECT name, picture, friends, current_location from hugo_%s.users where user_id =" % os.environ['HUGO_ENV'].lower())
+            query = ("SELECT name, picture, friends, current_location from hugo_%s.users where facebook_id =" % os.environ['HUGO_ENV'].lower())
             query = query + "%s"
             cur.execute(query, (user_id))
             row = cur.fetchone()
         except:
-            print sys.exc_info()
             raise tornado.web.HTTPError(403)            
         # Send confirmation of success
         self.content_type = 'application/json'
-        self.write(row)
-#        details = {'status':'success', 'name': row[0], 'picture':row[1], 'friends':len(simplejson.loads(row[2])), 'current_location': row[3]}
-#        self.write(details)
+        details = {'status':'success', 'name': row[0], 'picture':row[1], 'friends':len(simplejson.loads(row[2])), 'current_location': row[3]}
+        self.write(details)
         
             
     # TODO: Vulnerable for injection
