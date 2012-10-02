@@ -7,7 +7,7 @@ import time
 import simplejson
 import sys
 import MySQLdb
-#import hugo.fb
+import hugo.fb
 from boto.dynamodb.condition import *
 import boto.dynamodb
 
@@ -31,6 +31,7 @@ class AuthHandler(BaseHandler):
             raise tornado.web.HTTPError(403)            
         # Send confirmation of success
         self.content_type = 'application/json'
+        print row
         details = {'status':'success', 'name': row[0], 'picture':row[1], 'friends':len(simplejson.loads(row[2])), 'current_location': row[3]}
         self.write(details)
         
