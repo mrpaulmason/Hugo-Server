@@ -56,7 +56,7 @@ class PlacesHandler(BaseHandler):
             for item in result:
                 found = None
 
-                if 'spot_categories' not in item or item['spot_categories'].find(category) == -1:
+                if ('spot_categories' not in item or item['spot_categories'].find(category) == -1) and ('spot_category' not in item or item['spot_category'].find(category) == -1):
                     continue
                                     
                 for pItem in items:
@@ -160,6 +160,9 @@ class CategoriesHandler(BaseHandler):
             
 
             for item in result:
+                
+                if 'spot_category' in item:
+                    cats.append(item['spot_category'])
                 
                 try:
                     item_categories = simplejson.loads(item['spot_categories'])
