@@ -312,13 +312,17 @@ def query_checkins(hugo_id, oauth_access_token, origin, timestamp, delta):
     
     return None
 
-def processCheckins(hugo_id, oauth_access_token, location_data=None):
+def processCheckins(hugo_id, oauth_access_token, location_data=None, incremental=False):
     cloud.setkey( api_key="4667", api_secretkey="31a2945a0c955406be6d669f98e17ed9e9ee3ed7")
 
     tmp_ts = int(time.mktime(time.gmtime()))
     # 2 years
-    delta = 3600*24*7
-    numPeriods = 104
+    if incremental == False:
+        delta = 3600*24*7
+        numPeriods = 104
+    else:
+        delta = 3600*24*1
+        numPeriods = 3
 
     hugo_ids = []
     oauth_tokens = []
