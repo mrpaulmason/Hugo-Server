@@ -110,49 +110,49 @@ if __name__ == "__main__":
         user_script = f.read()
         user_script = user_script.replace("!HUGO_SERVER!", server.lower())
         user_script = user_script.replace("!HUGO_ENV!", env.lower())
-        reservation = conn.run_instances("ami-db86a39e", key_name="hugo", instance_type="t1.micro", security_groups=["webserver"], user_data =user_script)
-        instance = reservation.instances[0]
-        status = instance.update()
-        while status == 'pending':
-            time.sleep(1)
+        reservation = conn.run_instances("ami-db86a39e", key_name="hugo", min_count=5, max_count=5, instance_type="t1.micro", security_groups=["webserver"], user_data =user_script)
+        for instance in reservation.instances:
             status = instance.update()
+            while status == 'pending':
+                time.sleep(1)
+                status = instance.update()
+                
+            if status == 'running':
+                instance.add_tag("Name","%s-%s" % (server, env))
+                instance.add_tag("Server","%s" % server)
+                instance.add_tag("Environment","%s" % env)
+                instance.add_tag("Busy","yes")
+            else:
+                print('Instance status: ' + status)
+                sys.exit(1)
+                
+            print "Server is up and running at %s" % (instance.public_dns_name)
             
-        if status == 'running':
-            instance.add_tag("Name","%s-%s" % (server, env))
-            instance.add_tag("Server","%s" % server)
-            instance.add_tag("Environment","%s" % env)
-            instance.add_tag("Busy","yes")
-        else:
-            print('Instance status: ' + status)
-            sys.exit(1)
-            
-        print "Server is up and running at %s" % (instance.public_dns_name)
-        
-        if status == "running":
-            retry = True
-            while retry:
+            if status == "running":
+                retry = True
+                while retry:
+                    try:
+                        output = check_output("ssh -o StrictHostKeyChecking=no ubuntu@%s cat /etc/webserver-init.touchdown|grep FINISHED" % (instance.public_dns_name))
+                        retry = False
+                    except:
+                        time.sleep(10)
+                        
+            if output[0].find("FINISHED") == 0:
+                instance.add_tag("Busy", "no")
+                elb = boto.ec2.elb.connect_to_region('us-west-1')
+                lb = [x for x in elb.get_all_load_balancers() if x.name == "%s-%s" % (env, server)]
                 try:
-                    output = check_output("ssh -o StrictHostKeyChecking=no ubuntu@%s cat /etc/webserver-init.touchdown|grep FINISHED" % (instance.public_dns_name))
-                    retry = False
+                    lb[0].register_instances(instance.id)                
+                    print bcolors.OKBLUE + "Successfully ran a '%s' on '%s' for '%s' environment (%f s) with LB %s." % (action, server, env, time.time()-start, lb[0].name) + bcolors.ENDC                
                 except:
-                    time.sleep(10)
-                    
-        if output[0].find("FINISHED") == 0:
-            instance.add_tag("Busy", "no")
-            elb = boto.ec2.elb.connect_to_region('us-west-1')
-            lb = [x for x in elb.get_all_load_balancers() if x.name == "%s-%s" % (env, server)]
-            try:
-                lb[0].register_instances(instance.id)                
-                print bcolors.OKBLUE + "Successfully ran a '%s' on '%s' for '%s' environment (%f s) with LB %s." % (action, server, env, time.time()-start, lb[0].name) + bcolors.ENDC                
-            except:
-                print bcolors.FAIL + "FAILED associating LB with '%s' on '%s' for '%s' environment (%f s)." % (action, server, env, time.time()-start) + bcolors.ENDC
+                    print bcolors.FAIL + "FAILED associating LB with '%s' on '%s' for '%s' environment (%f s)." % (action, server, env, time.time()-start) + bcolors.ENDC
+                    instance.terminate()
+                    sys.exit(1)
+                
+            else:
+                print bcolors.FAIL + "FAILED running a '%s' on '%s' for '%s' environment (%f s)." % (action, server, env, time.time()-start) + bcolors.ENDC
                 instance.terminate()
                 sys.exit(1)
-            
-        else:
-            print bcolors.FAIL + "FAILED running a '%s' on '%s' for '%s' environment (%f s)." % (action, server, env, time.time()-start) + bcolors.ENDC
-            instance.terminate()
-            sys.exit(1)
 
         for i in oldInstances:
             if i.tags['Environment'] == env and i.tags['Server'] == server and i.tags['Busy'] == "no":
