@@ -74,11 +74,12 @@ class PlacesHandler(BaseHandler):
                     if found['spot_checkins'] < item['spot_checkins']:
                         found['spot_checkins'] = item['spot_checkins']
                                             
-                    if 'author_hugo_id' in item:
-                        found['authors_hugo'].append((item['author_uid'], item['author_hugo_id']))
+                    if item['author_uid'] not in found['authors']:
+                        if 'author_hugo_id' in item:
+                            found['authors_hugo'].append((item['author_uid'], item['author_hugo_id']))
                         
-                    found['authors'].append(item['author_uid'])
-                    found['pics'].append(item['author_image'])
+                        found['authors'].append(item['author_uid'])
+                        found['pics'].append(item['author_image'])
                 else:
                     if 'author_hugo_id' in item:
                         item['authors_hugo'] = [(item['author_uid'], item['author_hugo_id'])]
