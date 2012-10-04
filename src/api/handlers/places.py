@@ -22,11 +22,9 @@ def levenshtein(seq1, seq2):
     return thisrow[len(seq2) - 1]
 
 class PlacesHandler(BaseHandler):
-    def get(self):
-        place_id = self.get_argument("place_id", "103239676402302")
-        title = self.get_argument("title", "Dash Cafe")
+    def get(self, place_id="103", slug=""):
         
-        self.render('places.html', title=title)
+        self.render('places.html', title=slug.replace("_"," "))
     
     # TODO: Need key signatuare to prevent data theft
     def post(self):

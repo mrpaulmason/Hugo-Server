@@ -5,6 +5,7 @@ from handlers.comments import *
 from handlers.addPost import *
 
 url_patterns = [
+    (r"/place/([^/]+)/([^/]+)", PlacesHandler),
     (r"/places", PlacesHandler),
     (r"/places/categories", CategoriesHandler),
     (r"/auth", AuthHandler),
