@@ -26,7 +26,7 @@ class PlacesHandler(BaseHandler):
         place_id = self.get_argument("place_id", "103239676402302")
         title = self.get_argument("title", "Dash Cafe")
         
-        self.render('places.html')
+        self.render('places.html', title=title)
     
     # TODO: Need key signatuare to prevent data theft
     def post(self):
