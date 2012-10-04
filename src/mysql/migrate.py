@@ -27,6 +27,7 @@ def authorizeLocalComputer():
         print "Authorizing, waiting for authorization to complete."
         sleep(30)
     except:
+        print sys.exc_info()
         print "Already authorized!"
     
     return db.endpoint
