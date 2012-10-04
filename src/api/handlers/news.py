@@ -26,7 +26,7 @@ class NewsHandler(BaseHandler):
 
         result = table.query(
             hash_key = "%s_%d" % (prefix, int(hugo_id)), 
-            max_results = 25, 
+            max_results = 50, 
             scan_index_forward = False)
 
         items = []  

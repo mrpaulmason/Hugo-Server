@@ -113,8 +113,13 @@ class AddPostHandler(BaseHandler):
                 })        
 
         dItem = tableNewsfeed.new_item(attrs=item_attr)
-        dItem.put()
+        dItem.put()        
+        
         dItem = tableCheckin.new_item(attrs=item_attr)
+        dItem.put()
+
+        item_attr['bundle_id'] = "user_%d" % (user_id)
+        dItem = tableNewsfeed.new_item(attrs=item_attr)
         dItem.put()
 
         # Loop through all friends and add update
