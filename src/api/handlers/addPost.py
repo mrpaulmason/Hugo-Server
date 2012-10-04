@@ -80,6 +80,7 @@ class AddPostHandler(BaseHandler):
                     'type' : "checkin",
                     'id' : geohash.encode(place['location']['latitude'], place['location']['longitude'], precision=13) + "_" + str(int(time.mktime(time.gmtime()))),
                     'source' : 'hugo',
+                    'spot_type' : spot_type,
                     'spot_name' : place['name'],
                     'spot_category' : place['category'],
                     'spot_location' : simplejson.dumps(place['location'])
