@@ -24,7 +24,7 @@ def levenshtein(seq1, seq2):
 class PlacesHandler(BaseHandler):
     def get(self, place_id="103", slug=""):
         
-        self.render('places.html', title=slug.replace("_"," "))
+        self.render('places.html', place_id=place_id, slug=slug, title=slug.replace("_"," "))
     
     # TODO: Need key signatuare to prevent data theft
     def post(self):
