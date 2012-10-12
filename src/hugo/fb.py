@@ -64,7 +64,7 @@ def updateNewsfeed(hugo_id, dbconn, origin, data):
                     if neighbor == gtarget:
                         isLocal = True
             
-                if not isLocal:
+                if not isLocal and item['author_uid'] != item['me_uid']:
                     continue
             
             # Remove duplicates, helps w/ batch photo uploads.

@@ -111,6 +111,8 @@ if __name__ == "__main__":
         user_script = user_script.replace("!HUGO_SERVER!", server.lower())
         user_script = user_script.replace("!HUGO_ENV!", env.lower())
         reservation = conn.run_instances("ami-db86a39e", key_name="hugo", min_count=5, max_count=5, instance_type="t1.micro", security_groups=["webserver"], user_data =user_script)
+        elb = boto.ec2.elb.connect_to_region('us-west-1')
+        lb = [x for x in elb.get_all_load_balancers() if x.name == "%s-%s" % (env, server)]
         for instance in reservation.instances:
             status = instance.update()
             while status == 'pending':
@@ -137,22 +139,18 @@ if __name__ == "__main__":
                     except:
                         time.sleep(10)
                         
-            if output[0].find("FINISHED") == 0:
+            if output[0].find("FINISHED") != -1:
                 instance.add_tag("Busy", "no")
-                elb = boto.ec2.elb.connect_to_region('us-west-1')
-                lb = [x for x in elb.get_all_load_balancers() if x.name == "%s-%s" % (env, server)]
                 try:
                     lb[0].register_instances(instance.id)                
                     print bcolors.OKBLUE + "Successfully ran a '%s' on '%s' for '%s' environment (%f s) with LB %s." % (action, server, env, time.time()-start, lb[0].name) + bcolors.ENDC                
                 except:
                     print bcolors.FAIL + "FAILED associating LB with '%s' on '%s' for '%s' environment (%f s)." % (action, server, env, time.time()-start) + bcolors.ENDC
                     instance.terminate()
-                    sys.exit(1)
                 
             else:
                 print bcolors.FAIL + "FAILED running a '%s' on '%s' for '%s' environment (%f s)." % (action, server, env, time.time()-start) + bcolors.ENDC
                 instance.terminate()
-                sys.exit(1)
 
         for i in oldInstances:
             if i.tags['Environment'] == env and i.tags['Server'] == server and i.tags['Busy'] == "no":
